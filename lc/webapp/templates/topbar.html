@@ -5,11 +5,14 @@
 	Les Comments
       </div>
       <div class="four mobile-one columns">
-	{% if session.id %}
-	<a href="#" class="lc-top-link" style="float:right;margin-top:20px;">Submit</a>
+	{% if user.is_authenticated and not loginfail %}
+          Welcome {{ user.username }}
+    <a href="/logout" class="lc-top-link" style="float:right;margin-top:20px;">Logout</a>
 	{% else %}
-	<a href="#" id="login-button" class="lc-top-link" style="float:right;margin-top:20px;">Login</a>
-	<a href="#" id="register-button" class="lc-top-link" style="float:right;margin-top:20px;margin-right:10px;">Register</a>
+          {% if loginfail %}
+          Wrong username/password
+          {% endif %}
+	<a href="#" id="login-button" class="lc-top-link" style="float:right;margin-top:20px;">Login/Register</a>
 	<script>
 	  $("#login-button").click(login);
 	</script>
