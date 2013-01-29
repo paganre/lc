@@ -1,3 +1,22 @@
 function login(){
-    
+    $.ajax({
+	    url: 'test/',
+                type: 'POST',
+		data: {'message':'hello'}
+                success: function(response) { 
+		alert(response.message);
+	    }
+	});
+    return false;
+    if($("#login-container").hasClass("dp-none")){
+	$("#login-container").removeClass("dp-none");
+	h = $(window).height();
+	if($("#login-modal").height() < h){
+	    $("#login-modal").css("top", (h-$("#login-modal").height())/4);
+	}
+    }
+}
+
+function ajaxResp(data){
+    alert(data.message);
 }

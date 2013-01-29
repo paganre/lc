@@ -4,6 +4,8 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse
+from webapp import user
+import json
 
 # Common site request forgery protection risk
 # Request is obtained from the login.html via POST
@@ -11,41 +13,34 @@ from django.http import HttpResponseRedirect, HttpResponse
 # More info: https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
 @csrf_protect
 def home(request):
-    loginfail = False
-    if request.method == 'POST':
-        isRegister = request.POST.get('isRegister', '')
-        if isRegister == "True":
-            rnickname = request.POST.get('rnickname','')
-            rpassword = request.POST.get('rpassword','')
-            remail = request.POST.get('remail','')
-            if rnickname and rpassword:
-                #-------- -------- -------
-                #Uncomment the body of the if-clause
-                #To activate registration
-                #-------- -------- -------
-                #user = User.objects.create_user(username = rnickname,
-                #                                password = rpassword,
-                #                                email = remail)
-                #user.is_staff = False
-                #user.save()
-                #auth.login(request, user)
-                return HttpResponseRedirect("")
-            else:
-                return HttpResponseRedirect("")
+    return render_to_response('home.html',{"user": request.user},context_instance=RequestContext(request))
+
+@csrf_protect
+def register(request):
+    name = request.POST.get('username','')
+    password = request.POST.get('password','')
+    email = request.POST.get('email','')
+    if name and password:
+        res = user.register(request,name,password,email)
+        if(res[0]):
+            return HttpResponse(json.dumps({'result':0}))
         else:
-            nickname = request.POST.get('nickname', '')
-            password = request.POST.get('password', '')
-            user = auth.authenticate(username=nickname, password=password)
-            if user is not None and user.is_active:
-                auth.login(request, user);
-                return HttpResponseRedirect("")
-            else:
-                loginfail = True
-                return render_to_response('home.html',{"user": request.user, "loginfail": loginfail},context_instance=RequestContext(request))
-    else:
-        return render_to_response('home.html',{"user": request.user, "loginfail": loginfail},context_instance=RequestContext(request))
+            return HttpResponse(json.dumps({'result':-1,'error':'Username taken'}))
+    return HttpResponse(json.dumps({'result':-1,'error':"Fields not set"}))
+
+@csrf_protect
+def login(request):
+    name = request.POST.get('username','')
+    password = request.POST.get('password','')
+    if name and password:
+        res = user.login(request,name,password)
+        if(res[0]):
+            return HttpResponse(json.dumps({'result':0}))
+        else:
+            return HttpResponse(json.dumps({'result':-1,'error':'Wrong Credentials'}))
+    return HttpResponse(json.dumps({'result':-1,'error':'Fields not set'}))
+        
 
 def logoutUser(request):
-    leaving_user = request.user.username
     auth.logout(request)
-    return HttpResponse("Bye %s!" % leaving_user)
+    return HttpResponseRedirect("/")

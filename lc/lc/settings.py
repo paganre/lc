@@ -60,15 +60,17 @@ STATIC_ROOT = ''
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/s/'
+STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    '/var/www/lc.com/static',
+    '/var/www/static/',
 )
+
+
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -85,8 +87,10 @@ SECRET_KEY = 'bp($89vez(78$f!@3%7q(1nt*&amp;jc3qw8g&amp;+$63n^1pxoeiwoa#'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    'django.template.loaders.eggs.Loader',
 )
+
+
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',

@@ -1,7 +1,53 @@
-<div class="modal-container dp-none" id="login-container" style="opacity:0;">
+<div class="modal-container dp-none" id="login-container">
     <div class="modal" id="login-modal">
       <div class="container">
-	HI THERE!
+          <div class="row" style="min-width:0px;">
+            <div class="six mobile-one columns" style="padding: 9px 15px;">
+                <div style="text-align:center;color: #444;padding-bottom: 5px;border-bottom: solid 1px #aaa;">Login
+                </div>
+                                    
+                <div style="padding-top:5px">
+                    <label style="font-weight: lighter;">nickname</label>
+                    <input type="text" style="height: 22px;" id="nickname">
+                </div>
+
+                <div style="">
+                    <label style="font-weight: lighter;">password</label>
+                    <input type="password" style="height: 22px;" id="password">
+                </div>
+                    
+                <a id="login-button" class="secondary small button">Login</a>
+                
+            </div>
+                
+            <div class="six mobile-one columns" style="padding: 9px 15px;border-left: solid 1px #aaa;">
+                <div style="text-align:center;color: #444;padding-bottom: 5px;border-bottom: solid 1px #aaa;">Register
+                </div>
+                        
+                    <div style="padding-top:5px">
+                        <label style="font-weight: lighter;">nickname</label>
+                        <input type="text" style="height: 22px;" id="rnickname">
+                    </div>
+                        
+                    <div style="">
+                        <label style="font-weight: lighter;">password</label>
+                        <input type="password" style="height: 22px;" id="rpassword">
+                    </div>
+                        
+                    <div style="">
+                        <label style="font-weight: lighter;">e-mail (optional)</label>
+                        <input type="text" style="height: 22px;" id="remail">
+                    </div>
+                        
+                    <a id="register-button" class="secondary small button">Register</a>
+                    
+                </div>
+            </div>
       </div>
     </div>
 </div>
+
+<script>
+  $("#register-button").click(register);
+  $("#login-button").click(loginWith);
+</script>
