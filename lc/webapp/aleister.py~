@@ -3,7 +3,6 @@ import HTMLParser
 class Aleister(HTMLParser.HTMLParser):
 
     def __init__(self, *args, **kwargs):
-        # Can't use super() - HTMLParser is an old-style class
         HTMLParser.HTMLParser.__init__(self, *args, **kwargs)
         self.in_title = False
         self.title = ''
@@ -18,4 +17,4 @@ class Aleister(HTMLParser.HTMLParser):
 
     def handle_data(self, data):
         if self.in_title:
-            self.title.append(data)
+            self.title += data

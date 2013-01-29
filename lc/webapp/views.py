@@ -9,6 +9,9 @@ from webapp.aleister import Aleister
 import json
 import traceback
 import requests
+from django.template.loader import get_template
+from django.template import Context
+
 
 # Common site request forgery protection risk
 # Request is obtained from the login.html via POST
@@ -41,7 +44,13 @@ def link(request):
             r = requests.get(link)
             crawler = Aleister()
             crawler.feed(r.text)
-            return HttpResponse(json.dumps({'result':0,'parsed':crawler.title.strip()}))
+            host = crawler.parse_domain(r.url)
+            t = get_template('parsed_url.html')
+            context = {
+                'title':crawler.title,
+                'domain':host
+                }
+            return HttpResponse(json.dumps({'result':0,'html':t.render(Context(context))}))
         else:
             return HttpResponse(json.dumps({'result':0,'parsed' : r.status_code})) 
     else:

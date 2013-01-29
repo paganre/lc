@@ -18,6 +18,7 @@ class Thread(models.Model):
     id = models.IntegerField(primary_key=True)
     creator = models.ForeignKey('LcUser',verbose_name="creator")
     title = models.CharField(max_length = 250)
+    suggested_title = models.CharField(max_length = 250)
     url = models.CharField(max_length = 1000)
     domain = models.ForeignKey('Domain',verbose_name="domain")
     time_created = models.IntegerField()

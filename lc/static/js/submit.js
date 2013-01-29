@@ -1,3 +1,5 @@
+var displaying_response = 0;
+
 function submitLink(){
     link = $("#link-field").val();
     $.ajax({
@@ -7,8 +9,14 @@ function submitLink(){
                 success: function(response) {
                 response = JSON.parse(response);
                 if(response.result == 0){
-		    alert(response.parsed);
-                }else{
+		    if(displaying_response == 0){
+			$("#submit-container").append(response.html);
+			displaying_response = 1;
+		    }else{
+			$("#parsed-url").remove();
+			$("#submit-container").append(response.html);
+		    }
+		}else{
                     alert(response.error);
                 }
             }
