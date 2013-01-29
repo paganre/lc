@@ -1,0 +1,18 @@
+<div class="container">
+  <div class="row lc-top-bar" style="height:44px;">
+      <div class="four mobile-one columns"></div>
+      <div class="four mobile-two columns lc-top-title">
+	Les Comments
+      </div>
+      <div class="four mobile-one columns">
+	{% if session.id %}
+	<a href="#" class="lc-top-link" style="float:right;margin-top:20px;">Submit</a>
+	{% else %}
+	<a href="#" id="login-button" class="lc-top-link" style="float:right;margin-top:20px;">Login</a>
+	<script>
+	  $("#login-button").click(login);
+	</script>
+	{% endif %}
+      </div>
+  </div>
+</div>
