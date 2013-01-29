@@ -5,7 +5,10 @@ from django.template import RequestContext
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse
 from webapp import user
+from webapp.aleister import Aleister
 import json
+import traceback
+import requests
 
 # Common site request forgery protection risk
 # Request is obtained from the login.html via POST
@@ -15,6 +18,35 @@ import json
 def home(request):
     return render_to_response('home.html',{"user": request.user},context_instance=RequestContext(request))
 
+@csrf_protect
+def submit(request):
+    if request.user and request.user.is_authenticated:
+        return render_to_response('submit.html',{"user": request.user},context_instance=RequestContext(request))
+    else:
+        return HttpResponseRedirect("/")
+
+@csrf_protect
+def link(request):
+    if request.user and request.user.is_authenticated:
+        link = request.POST.get('link','')
+        # head request to link
+        if not (link.startswith('http://') or link.startswith('https://')):
+            link = 'http://'+link
+        try:
+            r = requests.head(link)
+        except:
+            return HttpResponse(json.dumps({'result':0,'parsed':'unreachable, check url'}))
+        
+        if r.ok:
+            r = requests.get(link)
+            crawler = Aleister()
+            crawler.feed(r.text)
+            return HttpResponse(json.dumps({'result':0,'parsed':crawler.title.strip()}))
+        else:
+            return HttpResponse(json.dumps({'result':0,'parsed' : r.status_code})) 
+    else:
+        return HttpResponse(json.dumps({'result':-1,'parsed':'not authed'}))
+    
 @csrf_protect
 def register(request):
     name = request.POST.get('username','')

@@ -1,0 +1,4 @@
+function submitLink(){
+    link = $("#link-field").val();
+    
+}

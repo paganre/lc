@@ -1,0 +1,56 @@
+<html>
+<head>
+  <title>Les Comments</title>
+  <link href="/static/lc/stylesheets/app.css" media="screen, projector, print" rel="stylesheet" type="text/css" />
+  <link href="/static/lc/stylesheets/general_foundicons.css" media="screen, projector, print" rel="stylesheet" type="text/css" />
+  <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+  <script src="/static/js/home.js" type="text/javascript"></script>
+  <script src="/static/js/submit.js" type="text/javascript"></script>
+</head>
+<body style="background:#eee;">
+  {% include "topbar.html" %}
+  <div class="container">
+    <div class="row">
+      <div class="ten columns centered" style="max-width:600px;">
+	<div style="color: #444;
+		    font-size: 16px;
+		    text-shadow: 0em 0.1em white;
+		    padding: 9px 0px;">
+	  Paste your url here</div>
+	<input id="link-field" type="text"></input>
+	<a href="#" id="submit-button" class="secondary button" style="float: right;">Done</a>
+	<script>$("#submit-button").click(submitLink)</script>
+      </div>
+    </div>
+  </div>
+
+<script>
+  $.ajaxSetup({
+     beforeSend: function(xhr, settings) {
+         function getCookie(name) {
+             var cookieValue = null;
+             if (document.cookie && document.cookie != '') {
+                 var cookies = document.cookie.split(';');
+                 for (var i = 0; i < cookies.length; i++) {
+                     var cookie = jQuery.trim(cookies[i]);
+                     // Does this cookie string begin with the name we want?
+                 if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                     break;
+                 }
+             }
+         }
+         return cookieValue;
+         }
+         if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+             // Only send the token to relative URLs i.e. locally.
+             xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+         }
+     }
+                                     });
+				
+</script>
+
+</body>
+</html>
+

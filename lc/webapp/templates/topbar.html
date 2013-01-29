@@ -6,8 +6,9 @@
       </div>
       <div class="four mobile-one columns">
 	{% if user.is_authenticated %}
-          Welcome {{ user.username }}
-    <a href="/logout" class="lc-top-link" style="float:right;margin-top:20px;">Logout</a>
+	<a href="/logout" class="lc-top-link" style="float:right;margin-top:20px;">Logout</a>
+        <a href="#" class="lc-top-link" style="float:right;margin-top:20px;margin-right:10px">{{user.username}}</a>
+	<a href="/submit" class="lc-top-link" style="float:right;margin-top:20px;margin-right:10px;font-weight:bolder !important;">Submit</a>
 	{% else %}
 	<a href="#" id="login-register-button" class="lc-top-link" style="float:right;margin-top:20px;">Login/Register</a>
 	<script>
