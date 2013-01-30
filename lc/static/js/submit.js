@@ -1,22 +1,39 @@
-var displaying_response = 0;
+var selected_link;
+var suggested_title;
+var domain;
 
 function submitLink(){
     link = $("#link-field").val();
+    selected_link = link;
     $.ajax({
-            url: 'link/',
+            url: '/link/',
                 type: 'POST',
                 data: {'link':link},
                 success: function(response) {
                 response = JSON.parse(response);
-                if(response.result == 0){
-		    if(displaying_response == 0){
-			$("#submit-container").append(response.html);
-			displaying_response = 1;
-		    }else{
-			$("#parsed-url").remove();
-			$("#submit-container").append(response.html);
-		    }
+                if(response.html){
+		    $("#submit-container").html(response.html);
+		    suggested_title = $("#title-field").val();
+		    domain = $("#domain-label").html();
 		}else{
+                    alert(response.error);
+                }
+            }
+        });
+    return false;
+}
+
+function createThread(){
+    title = $("#title-field").val();
+    $.ajax({
+            url: '/create/',
+                type: 'POST',
+                data: {'link':selected_link,'title':title,'suggested':suggested_title,'domain':domain},
+                success: function(response) {
+                response = JSON.parse(response);
+                if(response.result == 0){
+		    alert("Thread created with id: "+response.tid);
+                }else{
                     alert(response.error);
                 }
             }

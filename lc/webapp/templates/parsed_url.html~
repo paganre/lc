@@ -1,4 +1,4 @@
-<div class="row" style="margin-top: 10px;">
+<div class="row" id="parsed-url">
   <div class="ten columns centered" style="max-width:600px;">
     <div style="color: #444;
 	        font-size: 16px;
@@ -7,6 +7,16 @@
       Suggested title
       <div style="font-size: 12px;display: inline-block;">({{domain}})</div>
     </div>
-    <input id="link-field" type="text" value="{{title}}">
+    <input id="title-field" type="text" value="{{title}}">
+
+    <div style="font-weight:lighter;margin-bottom:10px;">
+      Your link was:
+      <a href="{{url}}" style="color:black !important; text-decoration:underline;">{{url_}}</a>
+    </div>
+
+    <a class="success button" id="create-button" style="float:right; text-shadow:0.1em 0.1em black;">Create</a>
+    <a class="secondary button" id="cancel-button" style="margin-right:15px; float:right; font-weight:lighter !important; text-shadow:0.1em 0.1em white;" href="/submit">Cancel</a>
+
   </div>
+  <script>$("#create-button").click(createThread);</script>
 </div>

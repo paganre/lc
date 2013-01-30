@@ -9,6 +9,9 @@ from webapp.aleister import Aleister
 import json
 import traceback
 import requests
+from django.template.loader import get_template
+from django.template import Context
+
 
 # Common site request forgery protection risk
 # Request is obtained from the login.html via POST
@@ -28,24 +31,56 @@ def submit(request):
 @csrf_protect
 def link(request):
     if request.user and request.user.is_authenticated:
-        link = request.POST.get('link','')
+        link_ = request.POST.get('link','')
         # head request to link
-        if not (link.startswith('http://') or link.startswith('https://')):
-            link = 'http://'+link
+        if not (link_.startswith('http://') or link_.startswith('https://')):
+            link = 'http://'+link_
+        else:
+            link = link_
         try:
             r = requests.head(link)
         except:
-            return HttpResponse(json.dumps({'result':0,'parsed':'unreachable, check url'}))
-        
+            return HttpResponse(json.dumps({'result':0,'error':'unreachable, check url'}))
         if r.ok:
             r = requests.get(link)
             crawler = Aleister()
             crawler.feed(r.text)
-            return HttpResponse(json.dumps({'result':0,'parsed':r.title}))
+            host = crawler.parse_domain(r.url)
+            # check (title,host) here to make sure that the item was not created before 
+            t = get_template('parsed_url.html')
+            context = {
+                'title':crawler.title,
+                'domain':host,
+                'url':link,
+                'url_':link_
+                }
+            return HttpResponse(json.dumps({'result':0,'html':t.render(Context(context))}))
         else:
-            return HttpResponse(json.dumps({'result':0,'parsed' : r.status_code})) 
+            return HttpResponse(json.dumps({'result':0,'error' : 'returned '+str(r.status_code)})) 
     else:
-        return HttpResponse(json.dumps({'result':-1,'parsed':'not authed'}))
+        return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
+
+@csrf_protect
+def create(request):
+    if request.user and request.user.is_authenticated:
+        link = request.POST.get('link','')
+        title = request.POST.get('title','')
+        suggested = request.POST.get('suggested','')
+        domain_name = request.POST.get('domain','')
+        domain_name = domain_name[1:len(domain)-1] # strip parantheses
+        # TODO: check (suggested,domain) here again - to make sure it's unique
+        res = d.createnx_domain(domain_name)
+        domain = None
+        # check if domain is retrieved (or created) successfully - if not rollback
+        if(res[0]):
+            domain = res[0]
+        else:
+            return HttpResponse(json.dumps({'result':-1,'error':res[1]}))
+        
+
+        return HttpResponse(json.dumps({'result':0,'link':link,'title':title,'suggested':suggested,'domain':domain}))
+    else:
+        return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
     
 @csrf_protect
 def register(request):

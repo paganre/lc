@@ -12,7 +12,8 @@ def login(request,username,password):
         if user is not None and user.is_active:
             auth.login(request, user);
             # bring up associated lc-user object
-            lcuser = LcUser.objects.filter(user = user)
+            lcuser = LcUser.objects.get(user = user)
+            request.session['uid'] = lcuser.id
             return (True,'')
         return (False,'')
     except:
@@ -32,6 +33,7 @@ def register(request,username,password,email=None):
         lcuser.save()
         user = auth.authenticate(username=username, password=password)
         auth.login(request, user);
+        request.session['uid'] = lcuser.id
         return (True,lcuser.id)
     except:
         connection._rollback()

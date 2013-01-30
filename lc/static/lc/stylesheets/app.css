@@ -5984,15 +5984,15 @@ table.hide-for-medium {
   text-align: center;
   font-size: 24px;
   font-weight: lighter;
-  font-family: Helvetica Neue;
+  font-family: Courier, Helvetica Neue;
   margin-top: 10px !important;
   text-shadow: 0em 0.1em white;
 }
 
 /* line 94, ../sass/app.scss */
 .lc-top-link {
-  color: black;
-  text-shadow: 0em 0.1em white;
+  color: #222;
+  text-shadow: 0em 0em white;
 }
 
 @font-face {

@@ -5,7 +5,8 @@ urlpatterns = patterns('',
     url(r'^register/$','webapp.views.register'),
     url(r'^login/$','webapp.views.login'),
     url(r'^submit/$','webapp.views.submit'),
-    url(r'^submit/link/$','webapp.views.link'),
+    url(r'^link/$','webapp.views.link'),
+    url(r'^create/$','webapp.views.create'),
     url(r'^logout/$', 'webapp.views.logoutUser'),
 )
 

@@ -87,13 +87,13 @@
 	text-align:center;
 	font-size:24px;
 	font-weight:lighter;
-	font-family:Courier,Helvetica Neue;
+	font-family:Helvetica Neue;
 	margin-top:10px !important;
 	text-shadow: 0em 0.1em white;
 }
 .lc-top-link{
-	color:#222;
-	text-shadow:0em 0em white;
+	color:black;
+	text-shadow:0em 0.1em white;
 }
 
 

@@ -8,14 +8,14 @@ import os
 
 def login(request,username,password):
     try:
-        user = auth.authenticate(username=nickname, password=password)
+        user = auth.authenticate(username=username, password=password)
         if user is not None and user.is_active:
             auth.login(request, user);
             # bring up associated lc-user object
             lcuser = LcUser.objects.filter(user = user)
-            request.session['lcuser'] = lcuser
+            request.session['uid'] = lcuser.id
             return (True,'')
-        return (False,'no such user')
+        return (False,'')
     except:
         connection._rollback()
         return (False,str(traceback.format_exc()))
@@ -31,6 +31,9 @@ def register(request,username,password,email=None):
         # create a blank lc user and associate with user object
         lcuser = LcUser(id=generateId(),user = user, time_joined = int(time()), join_ip = request.META['REMOTE_ADDR'])
         lcuser.save()
+        user = auth.authenticate(username=username, password=password)
+        auth.login(request, user);
+        request.session['uid'] = lcuser.id
         return (True,lcuser.id)
     except:
         connection._rollback()
