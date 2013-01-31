@@ -1,3 +1,49 @@
+function sendQuickComment(id){
+    text = $("#qcf"+id).val();
+    if(text.trim() == ""){
+        return false;
+    }
+    $("#qcf"+id).val('');
+    $("#qclabel"+id).removeClass("dp-none");
+    $("#qclabel"+id).html("yollaniyo...");
+    $.ajax({
+            url: '/scribe/',
+                type: 'POST',
+                data: {'text':text,'tid':id},
+                success: function(response) {
+                response = JSON.parse(response);
+                if(response.result == 0){
+                    $("#qclabel"+id).html("yorumun eklendi");
+                    getNewSubthread(response.id,id);
+                }else{
+                    $("#qclabel"+id).html("bi problem cikti: "+response.error);
+                }
+
+            }
+        });
+}
+
+function getNewSubthread(cid,tid){
+    $.ajax({
+            url: '/retrieve/',
+                type: 'POST',
+                data: {'type':'comment','page':'thread','new':1,'id':cid,'tid':tid},
+                success: function(response) {
+                response = JSON.parse(response);
+                if(response.result == 0){
+                    if(has_panel == 1){
+                        $("#cmore"+tid).prepend(response.html);
+                    }else{
+                        $("#qcparent"+tid).prepend(response.html);
+                    }
+                }else{
+                    $("#qclabel"+tid).html("bi problem cikti: "+response.error);
+                }
+
+            }
+        });
+}
+
 function upvote(id){
     c = 0;
     // check if already upvoted
@@ -62,7 +108,7 @@ function downvote(id){
 
 function changeCount(id,c){
     vraw = $("#comvote"+id).html();
-    v = parseInt(a.substring(1,a.length-1));
+    v = parseInt(vraw.substring(1,vraw.length-1));
     v = v +c ;
     $("#comvote"+id).html('['+v+']');
 }
@@ -124,7 +170,7 @@ function appendComment(cid,tid,pid){
     $.ajax({
             url: '/retrieve/',
                 type: 'POST',
-                data: {'type':'comment','page':'thread','id':cid,'tid':tid},
+                data: {'type':'comment','page':'thread','new':0,'id':cid,'tid':tid},
                 success: function(response) {
                 response = JSON.parse(response);
                 if(response.result == 0){

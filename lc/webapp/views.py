@@ -98,6 +98,9 @@ def retrieve(request):
             if page == 'home':
                 has_panel = int(request.POST.get('has_panel',''))
                 context.update({'has_panel':has_panel})
+            elif page == 'thread':
+                new = int(request.POST.get('new',''))
+                context.update({'new':new})
             t = get_template('generic/comment.html')
             html = t.render(Context(context))
             return HttpResponse(json.dumps({'result':0,'html':html}))

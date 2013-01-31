@@ -32,7 +32,10 @@
 
    </div>
   {% endfor %}
-
+  <script>
+    $(".comment-toggler").mouseenter(highlight);
+    $(".comment-toggler").mouseleave(removeHighlight);
+  </script>
   </div>
   <div class="two columns"></div>
   </div>

@@ -1,3 +1,45 @@
+function sendComment(id){
+    text = $("#qcf"+id).val();
+    if(text.trim() == ""){
+        return false;
+    }
+    $("#qcf"+id).val('');
+    $("#qclabel"+id).removeClass("dp-none");
+    $("#qclabel"+id).html("yollaniyo...");
+    $.ajax({
+            url: '/scribe/',
+                type: 'POST',
+                data: {'text':text,'tid':id},
+                success: function(response) {
+                response = JSON.parse(response);
+                if(response.result == 0){
+                    $("#qclabel"+id).html("yorumun eklendi");
+                    getNewSubthread(response.id,id);
+                }else{
+                    $("#qclabel"+id).html("bi problem cikti: "+response.error);
+                }
+
+            }
+        });
+}
+
+function getNewSubthread(cid,tid){
+    $.ajax({
+            url: '/retrieve/',
+                type: 'POST',
+                data: {'type':'comment','page':'thread','new':1,'id':cid,'tid':tid},
+                success: function(response) {
+                response = JSON.parse(response);
+                if(response.result == 0){
+                    $("#subthread-wrap").prepend(response.html);
+                }else{
+                    $("#qclabel"+tid).html("bi problem cikti: "+response.error);
+                }
+
+            }
+        });
+}
+
 function upvote(id){
     c = 0;
     // check if already upvoted
@@ -124,7 +166,7 @@ function appendComment(cid,tid,pid){
     $.ajax({
             url: '/retrieve/',
                 type: 'POST',
-                data: {'type':'comment','page':'thread','id':cid,'tid':tid},
+                data: {'type':'comment','page':'thread','new':0,'id':cid,'tid':tid},
                 success: function(response) {
                 response = JSON.parse(response);
                 if(response.result == 0){
