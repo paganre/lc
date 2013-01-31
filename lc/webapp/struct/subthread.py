@@ -13,7 +13,7 @@ class Subthread:
             self.children.append(child)
             return True
         else:
-            for c in children:
+            for c in self.children:
                 if(c.insertChildTo(id,child)):
                     return True
             return False

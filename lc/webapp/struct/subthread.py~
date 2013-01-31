@@ -18,6 +18,12 @@ class Subthread:
                     return True
             return False
 
+    def toList(self,level,list=[]):
+        list.append((self.comment,level))
+        for child in self.children:
+            child.toList(level+1,list)
+        return list
+
     def __str__(self):
         return str((self.comment.id,[str(child) for child in self.children]))
 

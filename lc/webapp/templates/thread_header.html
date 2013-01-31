@@ -1,0 +1,39 @@
+<div class="row">
+  <div class="two columns"></div>
+  <div class="eight mobile-four columns" style="padding: 2px 2px;">
+    
+    <div class="twelve columns" style="margin-top: 5px;">
+      <div class="row" style="min-width: 0px;">
+	<div class="twelve columns">
+	  <div style="font-size: 17px;">
+	    <a href="{{header.url}}" target="_newtab" class="lc-top-link" style="text-decoration:underline; color:royalblue;">{{header.title}}</a>
+	    <a href="#" style="font-weight: normal;font-size: 14px;" class="lc-top-link">[{{header.domain}}]</a>
+	  </div>
+	  <div style="font-weight: normal;
+		      margin-top: 5px;
+		      font-size: 12px;
+		      text-shadow: 0.1em 0.1em white;
+		      ">
+	    (<a href="/t/{{header.id}}" style="font-weight: bold;" class="lc-top-link"> {{header.num_comment}} yorum</a>, {{header.time}} once 
+	    <a href="#" style="font-weight: bold;" class="lc-top-link">{{header.creator_name}} </a> yaratti)
+	  </div>
+
+	  <div id="qcparent{{header.id}}" style="margin-top: 5px;
+		      font-size: 12px;
+		      font-weight: bold;
+		      text-shadow: 0.1em 0.1em white;">
+	    <div id="qcd{{header.id}}" style="max-width:500px; margin-top:5px;">
+	      <textarea id="qcf{{header.id}}"></textarea>
+	      <a href="#" class="secondary small button" onclick="sendQuickComment({{header.id}});return false;" style="float:right">Yolla</a>
+	      <span id="qclabel{{header.id}}" class="secondary label dp-none"></span>
+	    </div>
+	  </div>
+	  
+
+	</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two columns"></div>
+</div>

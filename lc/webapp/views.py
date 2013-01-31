@@ -28,11 +28,24 @@ def thread(request,tid):
     try:
         th = t.get_full_thread(int(tid))
         if(th[0]):
-            return render_to_response('thread.html',{"user": request.user,"header":th[1],"subs":th[2]},context_instance=RequestContext(request))
+            # adjust </div> ranges
+            comments = []
+            for subthread in th[2]:
+                sub = []
+                for i,c_ in enumerate(subthread):
+                    comment = c.comment_to_dict(c_[0])
+                    current_level = c_[1]
+                    if i == len(subthread)-1:
+                        sub.append([comment,range(current_level+1)])
+                    else:
+                        next_level = subthread[i+1][1]
+                        sub.append([comment,range(current_level - next_level +1)])
+                comments.append(sub)
+            return render_to_response('thread.html',{"user": request.user,"header":th[1],"threads":comments,"tid":tid},context_instance=RequestContext(request))
         else:
             return HttpResponse(th[1])
     except:
-        return HttpResponse(str(traceback.format_exc()))
+        return HttpResponse(str(traceback.format_exc())+"th[2] is :"+str(th[2])+"\r\n\ i was:"+str(i))
 
 @csrf_protect
 def retrieve(request):

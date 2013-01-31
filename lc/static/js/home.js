@@ -5,7 +5,7 @@ function sendQuickComment(id){
     }
     $("#qcf"+id).val('');
     $("#qclabel"+id).removeClass("dp-none");
-    $("#qclabel"+id).html("Sending comment...");
+    $("#qclabel"+id).html("yollaniyo...");
     $.ajax({
             url: 'scribe/',
                 type: 'POST',
@@ -13,10 +13,10 @@ function sendQuickComment(id){
                 success: function(response) {
                 response = JSON.parse(response);
                 if(response.result == 0){
-                    $("#qclabel"+id).html("Your comment added");
+                    $("#qclabel"+id).html("yorumun eklendi");
 		    getNewComment(response.id,id);
                 }else{
-                    $("#qclabel"+id).html("There was an error: "+response.error);
+                    $("#qclabel"+id).html("bi problem cikti: "+response.error);
                 }
 
             }
@@ -42,7 +42,7 @@ function getNewComment(cid,tid){
 			$("#qcparent"+tid).prepend(response.html);
 		    }
                 }else{
-                    $("#qclabel"+tid).html("There was an error: "+response.error);
+                    $("#qclabel"+tid).html("bi problem cikti: "+response.error);
                 }
 
             }
@@ -54,9 +54,9 @@ function openQuickComment(id){
     qcd = $("#qcd"+id);
     qcd.toggleClass("dp-none");
     if(qcd.hasClass("dp-none")){
-	$("#qct"+id).html("Hizlica-bi-yorum-yaz");
+	$("#qct"+id).html("hizlica-bi-yorum-yaz");
     }else{
-	$("#qct"+id).html("Salla");
+	$("#qct"+id).html("salla");
     }
 }
 

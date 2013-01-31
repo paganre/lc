@@ -1,0 +1,11 @@
+<div style="margin-left:15px;padding:5px 5px;">
+ <div style="padding:3px 3px; font-size:12px !important">[{{c.net_vote}}]<a href="#" class="lc-top-link"><strong>{{c.creator_name}}</strong></a> {{c.time}} once</div>
+ <div style="padding:3px 3px; font-size:12px !important">{{c.text}}</div>
+ <div style="padding:3px 3px; font-size:12px !important">
+   <a href="#" id="rpl{{c.id}}" onclick="toggleReply({{c.id}});return false;" class="lc-top-link"><strong>cevap-yaz</strong></a>
+ </div>
+ <div id="rpl-wrap{{c.id}}" class="dp-none" style="margin-bottom:10px; padding:3px 3px; font-size:12px !important">
+   <textarea id="rpl-field{{c.id}}"></textarea>
+   <a class="secondary small button" onclick="sendReply({{tid}},{{c.id}});return false;" style="float: right;">Yolla</a>
+   <span id="rpllabel{{c.id}}" class="secondary label dp-none"></span>
+ </div>

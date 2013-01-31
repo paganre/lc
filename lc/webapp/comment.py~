@@ -18,7 +18,28 @@ def add_comment(uid,tid,text,parent=None):
         c.save()
         return (True,id)
     except:
+        connection._rollback()
         return (False,str(traceback.format_exc()))
+
+def get_comment(cid):
+    try:
+        comment = Comment.objects.get(pk = int(cid))
+        return (True,{'id':comment.id,
+                      'creator_name':comment.creator.user.username,
+                      'creator_id':comment.creator.id,
+                      'time':comment.time_created,
+                      'text':comment.text,
+                      'net_vote':comment.up-comment.down})
+    except:
+        connection._rollback()
+        return (False,str(traceback.format_exc()))
+
+def comment_to_dict(comment):
+    return {'id':comment.id,
+            'creator_name':comment.creator,
+            'text':comment.text,
+            'time':comment.time_created,
+            'net_vote':comment.net_vote}
 
 def get_comment_fields(subthread):
     """

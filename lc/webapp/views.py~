@@ -1,4 +1,5 @@
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
+from django.middleware.csrf import get_token
 from django.contrib import auth
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -27,11 +28,24 @@ def thread(request,tid):
     try:
         th = t.get_full_thread(int(tid))
         if(th[0]):
-            return render_to_response('thread.html',{"user": request.user,"header":th[1],"subs":subs},context_instance=RequestContext(request))
+            # adjust </div> ranges
+            comments = []
+            for subthread in th[2]:
+                sub = []
+                for i,c_ in enumerate(subthread):
+                    comment = c.comment_to_dict(c_[0])
+                    current_level = c_[1]
+                    if i == len(subthread)-1:
+                        sub.append([comment,range(current_level+1)])
+                    else:
+                        next_level = subthread[i+1][1]
+                        sub.append([comment,range(current_level - next_level +1)])
+                comments.append(sub)
+            return render_to_response('thread.html',{"user": request.user,"header":th[1],"threads":comments},context_instance=RequestContext(request))
         else:
             return HttpResponse(th[1])
     except:
-        raise Http404
+        return HttpResponse(str(traceback.format_exc())+"th[2] is :"+str(th[2])+"\r\n\ i was:"+str(i))
 
 @csrf_protect
 def retrieve(request):
@@ -68,7 +82,7 @@ def retrieve(request):
 
 @csrf_protect
 def scribe(request):
-    if request.user and request.user.is_authenticated and 'uid' in request.session:
+    if request.user and request.user.is_authenticated() and 'uid' in request.session:
         try:
             tid = int(request.POST.get('tid',''))
             text = request.POST.get('text','')
@@ -89,6 +103,13 @@ def scribe(request):
 
 @csrf_protect
 def home(request):
+    # ---- CRSF Problem Solution -----
+    # Our problem was explained here
+    # http://stackoverflow.com/questions/13412653/django-no-csrftoken-in-cookie
+    # Django doesn't set the CSRF_COOKIE_USED flag if you don't use { % csrf_token % } to create the token
+    # Run get_token command to set the flag
+    csrf_token = get_token(request)
+    # --------------------------------
     tids = alfred.get_main()
     headers = [t.get_thread_header(tid) for tid in tids]
     headers = [h[1] for h in headers if h[0]]
@@ -102,14 +123,14 @@ def home(request):
 
 @csrf_protect
 def submit(request):
-    if request.user and request.user.is_authenticated:
+    if request.user and request.user.is_authenticated():
         return render_to_response('submit.html',{"user": request.user},context_instance=RequestContext(request))
     else:
         return HttpResponseRedirect("/")
 
 @csrf_protect
 def link(request):
-    if request.user and request.user.is_authenticated:
+    if request.user and request.user.is_authenticated():
         link_ = request.POST.get('link','')
         # head request to link
         if not (link_.startswith('http://') or link_.startswith('https://')):
@@ -141,29 +162,38 @@ def link(request):
 
 @csrf_protect
 def create(request):
-    if request.user and request.user.is_authenticated:
+    if request.user and request.user.is_authenticated():
         link = request.POST.get('link','')
         title = request.POST.get('title','')
         suggested = request.POST.get('suggested','')
         domain_name = request.POST.get('domain','')
         domain_name = domain_name[1:len(domain_name)-1] # strip parantheses
-        # TODO: check (suggested,domain) here again - to make sure it's unique
         res = d.createnx_domain(domain_name)
         domain = None
         # check if domain is retrieved (or created) successfully - if not rollback
         if(res[0]):
             domain = res[0]
         else:
-            return HttpResponse(json.dumps({'result':-1,'error':res[1]}))
-        # create thread
-        res = t.create_thread(int(request.session['uid']),title,suggested,domain,link)
-        if(res[0]):
-            return HttpResponse(json.dumps({'result':0,'tid':str(res[1])}))
+                return HttpResponse(json.dumps({'result':-1,'error':res[1]}))
+        # check if a thread with same domain and suggested title already exists
+        ds_res = t.check_domain_stitle(suggested, domain)
+        if(ds_res[0]==0):
+            # create thread
+            res = t.create_thread(int(request.session['uid']),title,suggested,domain,link)
+            if(res[0]):
+                return HttpResponse(json.dumps({'result':0,'tid':str(res[1])}))
+            else:
+                return HttpResponse(json.dumps({'result':-1,'error':res[1]}))
         else:
-            return HttpResponse(json.dumps({'result':-1,'error':res[1]}))
+            if(ds_res[0]==1):
+                # A thread with same domain name and suggested title exists
+                msg = 'Haber sitede. Thread id: '+str(ds_res[1])
+                return HttpResponse(json.dumps({'result':-1,'error':msg}))
+            else:
+                return HttpResponse(json.dumps({'result':-1,'error':'DB error'}))
     else:
         return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
-    
+
 @csrf_protect
 def register(request):
     name = request.POST.get('username','')
@@ -175,7 +205,7 @@ def register(request):
             return HttpResponse(json.dumps({'result':0}))
         else:
             return HttpResponse(json.dumps({'result':-1,'error':'Username taken'}))
-    return HttpResponse(json.dumps({'result':-1,'error':"Fields not set"}))
+    return HttpResponse(json.dumps({'result':-1,'error':'Fields not set'}))
 
 @csrf_protect
 def login(request):

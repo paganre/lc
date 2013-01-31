@@ -34,6 +34,14 @@ def get_comment(cid):
         connection._rollback()
         return (False,str(traceback.format_exc()))
 
+def comment_to_dict(comment):
+    return {'id':comment.id,
+            'creator_name':comment.creator.user.username,
+            'creator_id':comment.creator.id,
+            'text':comment.text,
+            'time':comment.time_created,
+            'net_vote':comment.up-comment.down}
+
 def get_comment_fields(subthread):
     """
     aux function to return the extracted fields of a comment subthread

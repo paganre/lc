@@ -1,0 +1,3 @@
+<div style="margin-left:15px;padding:5px 5px;">
+ <div style="padding:3px 3px; font-size:12px !important">[{{c.net_vote}}] <a href="#" class="lc-top-link"><strong>{{c.creator_name}}</strong></a> {{c.time}} once</div>
+ <div style="padding:3px 3px; font-size:12px !important">{{c.text}}</div>
