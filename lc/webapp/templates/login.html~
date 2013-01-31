@@ -3,46 +3,51 @@
       <div class="container">
           <div class="row" style="min-width:0px;">
             <div class="six mobile-one columns" style="padding: 9px 15px;">
-                <div style="text-align:center;color: #444;padding-bottom: 5px;border-bottom: solid 1px #aaa;">Login
+                <div style="text-align:center;color: #444;padding-bottom: 5px;border-bottom: solid 1px #aaa;">Giris
                 </div>
                                     
                 <div style="padding-top:5px">
-                    <label style="font-weight: lighter;">nickname</label>
+                    <label style="font-weight: lighter;">nick</label>
                     <input type="text" style="height: 22px;" id="nickname">
                 </div>
 
                 <div style="">
-                    <label style="font-weight: lighter;">password</label>
+                    <label style="font-weight: lighter;">sifre</label>
                     <input type="password" style="height: 22px;" id="password">
                 </div>
                     
-                <a id="login-button" class="secondary small button">Login</a>
+<<<<<<< HEAD
+                <a id="login-button" class="secondary small button">hoppa</a>
                 <div id="login-error" class="alert-box alert dp-none" style="margin-top:10px;font-size:12px;">
 		  
 		</div>
+=======
+                <a id="login-button" class="secondary small button">Login</a>
+                <div id="login-error" class="alert-box alert dp-none" style="margin-top:10px;font-size:12px;"></div>
+>>>>>>> 10a2e2a0e8eb24a10d1a1c298e6e35fdd98c564b
 
             </div>
                 
             <div class="six mobile-one columns" style="padding: 9px 15px;border-left: solid 1px #aaa;">
-                <div style="text-align:center;color: #444;padding-bottom: 5px;border-bottom: solid 1px #aaa;">Register
+                <div style="text-align:center;color: #444;padding-bottom: 5px;border-bottom: solid 1px #aaa;">Kayit ol
                 </div>
                         
                     <div style="padding-top:5px">
-                        <label style="font-weight: lighter;">nickname</label>
+                        <label style="font-weight: lighter;">nick</label>
                         <input type="text" style="height: 22px;" id="rnickname">
                     </div>
                         
                     <div style="">
-                        <label style="font-weight: lighter;">password</label>
+                        <label style="font-weight: lighter;">sifre</label>
                         <input type="password" style="height: 22px;" id="rpassword">
                     </div>
                         
                     <div style="">
-                        <label style="font-weight: lighter;">e-mail (optional)</label>
+                        <label style="font-weight: lighter;">e-mail (vermesen de olur)</label>
                         <input type="text" style="height: 22px;" id="remail">
                     </div>
                         
-                    <a id="register-button" class="secondary small button">Register</a>
+                    <a id="register-button" class="secondary small button">Kayit ol</a>
                     
 		    <div id="register-error" class="alert-box alert dp-none" style="margin-top:10px;font-size:12px;">
 
