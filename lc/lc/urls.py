@@ -8,6 +8,9 @@ urlpatterns = patterns('',
     url(r'^link/$','webapp.views.link'),
     url(r'^create/$','webapp.views.create'),
     url(r'^logout/$', 'webapp.views.logoutUser'),
+    url(r'^scribe/$','webapp.views.scribe'),               
+    url(r'^retrieve/$','webapp.views.retrieve'),
+    url(r'^t/(?P<tid>\d+)','webapp.views.thread'),
 )
 
 

@@ -8,10 +8,10 @@
 </head>
 <body style="background:#eee;">
   {% include "topbar.html" %}
-  {% include "login.html" %}
   {% for header in headers %}
    {% include "main_item.html" with header=header %}
   {% endfor %}
+  {% include "login.html" %}
 <script>
   $.ajaxSetup({ 
      beforeSend: function(xhr, settings) {

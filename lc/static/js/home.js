@@ -1,3 +1,80 @@
+function sendQuickComment(id){
+    text = $("#qcf"+id).val();
+    if(text.trim() == ""){
+	return false;
+    }
+    $("#qcf"+id).val('');
+    $("#qclabel"+id).removeClass("dp-none");
+    $("#qclabel"+id).html("Sending comment...");
+    $.ajax({
+            url: 'scribe/',
+                type: 'POST',
+                data: {'text':text,'tid':id},
+                success: function(response) {
+                response = JSON.parse(response);
+                if(response.result == 0){
+                    $("#qclabel"+id).html("Your comment added");
+		    getNewComment(response.id,id);
+                }else{
+                    $("#qclabel"+id).html("There was an error: "+response.error);
+                }
+
+            }
+        });
+}
+
+function getNewComment(cid,tid){
+    // see if the thread has a panel
+    has_panel = 1;
+    if($("#cp"+tid).length == 0){
+	has_panel = 0;
+    }
+    $.ajax({
+            url: 'retrieve/',
+                type: 'POST',
+                data: {'type':'comment','page':'home','has_panel':has_panel,'id':cid,'tid':tid},
+                success: function(response) {
+                response = JSON.parse(response);
+                if(response.result == 0){
+                    if(has_panel == 1){
+			$("#cmore"+tid).prepend(response.html);
+		    }else{
+			$("#qcparent"+tid).prepend(response.html);
+		    }
+                }else{
+                    $("#qclabel"+tid).html("There was an error: "+response.error);
+                }
+
+            }
+        });
+    
+}
+
+function openQuickComment(id){
+    qcd = $("#qcd"+id);
+    qcd.toggleClass("dp-none");
+    if(qcd.hasClass("dp-none")){
+	$("#qct"+id).html("Quick-comment");
+    }else{
+	$("#qct"+id).html("Cancel");
+    }
+}
+
+function toggleComment(id){
+    icon = $("#tci"+id);
+    comment_parent = $("#cpd"+id);
+    comment_parent.toggleClass("dp-none");
+    if(icon.hasClass("foundicon-minus")){
+	//close comment panel
+	icon.removeClass("foundicon-minus");
+	icon.addClass("foundicon-plus");
+    }else{
+	//open comment panel
+	icon.removeClass("foundicon-plus");
+	icon.addClass("foundicon-minus");
+    }
+}
+
 function login(){
     if($("#login-container").hasClass("dp-none")){
 	$("#login-container").removeClass("dp-none");

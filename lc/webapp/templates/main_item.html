@@ -1,33 +1,65 @@
 <div class="row">
-  <div class="twelve mobile-four columns" style="padding: 10px 10px;">
-    <div class="one columns" style="text-align: center;float: left;">
-      <i class="general foundicon-up-arrow" style="font-size: 20px;"></i>
-      <div style="width: 100%;
-		  text-align: center;
-		  padding: 2px 2px;
-		  font-weight: normal;
-		  font-size: 16px;
-		  text-shadow: 0em 0.1em white;">{{header.net_vote}}
-      </div>
-      <i class="general foundicon-down-arrow" style="font-size: 20px;"></i>
-    </div>
-    <div class="eleven columns" style="margin-top: 5px;">
+  <div class="two columns"></div>
+  <div class="eight mobile-four columns" style="padding: 2px 2px;">
+    
+    <div class="twelve columns" style="margin-top: 5px;">
       <div class="row" style="min-width: 0px;">
 	<div class="twelve columns">
 	  <div style="font-size: 17px;">
-	    <a href="#" class="lc-top-link" style="text-decoration:underline;">{{header.title}}</a>
+	    <a href="{{header.url}}" target="_newtab" class="lc-top-link" style="text-decoration:underline; color:royalblue;">{{header.title}}</a>
 	    <a href="#" style="font-weight: normal;font-size: 14px;" class="lc-top-link">[{{header.domain}}]</a>
 	  </div>
 	  <div style="font-weight: normal;
 		      margin-top: 5px;
-		      font-size: 14px;
+		      font-size: 12px;
 		      text-shadow: 0.1em 0.1em white;
 		      ">
-	    (<a href="#" style="font-weight: bold;" class="lc-top-link">{{header.num_comment}} comments</a>, submitted {{header.time}} ago by 
-	    <a href="#" style="font-weight: bold;" class="lc-top-link">{{header.creator_name}}</a>)
+	    (<a href="/t/{{header.id}}" style="font-weight: bold;" class="lc-top-link"> {{header.num_comment}} comments</a>, submitted {{header.time}} ago by 
+	    <a href="#" style="font-weight: bold;" class="lc-top-link">{{header.creator_name}} </a>)
 	  </div>
+
+	  {% if header.comments|length > 0 %}
+	  <div class="panel" id="cp{{header.id}}"  style="padding:10px !important; margin-bottom:0px !important; padding-bottom:20px !important; margin-top:10px; max-width:500px; font-size:12px !important;">
+	    <a href="#" onclick="toggleComment({{header.id}});return false;" class="toggle-comment-panel" id="tcp{{header.id}}" style="color: black;">
+	      <i id="tci{{header.id}}" class="general foundicon-minus" style="float: left;"></i>
+	    </a>
+	    {% for c in header.comments %}
+	    {% if forloop.counter0 == 0 %}
+	    <div id="cpd{{header.id}}" style="margin-left:15px;padding:5px 5px;">
+	    {% else %}
+	    <div style="margin-left:15px;padding:5px 5px;">
+	    {% endif %}
+	      <div style="padding:3px 3px; font-size:12px !important">[{{c.net_vote}}] <a href="#" class="lc-top-link"><strong>{{c.creator_name}}</strong></a> {{c.time}} ago</div>
+	      <div style="padding:3px 3px; font-size:12px !important">{{c.text}}
+	      {% if forloop.counter == header.comments|length %}
+	      <div id="cmore{{header.id}}" style="margin-top:5px;">
+		<a href="#" style="float:left; text-decoration:underline; font-size:12px;" class="lc-top-link">[see more]</a>
+	      </div>
+	      {% endif %}
+	      </div>
+	    {% endfor %}
+	    {% for c in header.comments %}
+	    </div>
+	    {% endfor %}
+	  </div>  
+	  {% endif %}
+
+	  <div id="qcparent{{header.id}}" style="margin-top: 5px;
+		      font-size: 12px;
+		      font-weight: bold;
+		      text-shadow: 0.1em 0.1em white;">
+	    <a href="#" id="qct{{header.id}}" onclick="openQuickComment({{header.id}});return false;" class="lc-top-link">Quick-comment</a>
+	    <div id="qcd{{header.id}}" class="dp-none" style="max-width:500px; margin-top:5px;">
+	      <textarea id="qcf{{header.id}}"></textarea>
+	      <a href="#" class="secondary small button" onclick="sendQuickComment({{header.id}});return false;" style="float:right">Send</a>
+	      <span id="qclabel{{header.id}}" class="secondary label dp-none"></span>
+	    </div>
+	  </div>
+
 	</div>
       </div>
     </div>
   </div>
+
+  <div class="two columns"></div>
 </div>

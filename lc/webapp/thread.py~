@@ -1,4 +1,5 @@
-from webapp.models import Thread,Domain,LcUser
+from webapp.models import Thread,Domain,LcUser,Comment
+from webapp import comment as c
 from django.db import connection
 from time import time
 import traceback
@@ -7,16 +8,35 @@ import os
 def generateId():
     return int(os.urandom(4).encode('hex'),16) / 2
 
-def get_thread_header(tid):
+def get_full_thread(tid):
     try:
         t = Thread.objects.get(pk = int(tid))
-        return (True,{'title':t.title,
+        cs = Comment.objects.filter(thread = t)
+        comments = c.get_comment_fields(cs)
+        return (True,{'id':t.id,
+                      'title':t.title,
                       'domain':t.domain.name,
                       'creator_name':t.creator.user.username,
                       'creator_id':t.creator.id,
                       'net_vote':t.up-t.down,
                       'time':t.time_created,
-                      'num_comment':0})
+                      'num_comment':len(Comment.objects.filter(thread = t)),
+                      'comments':comments})
+    except:
+        connection._rollback()
+        return (False,str(traceback.format_exc()))
+
+def get_thread_header(tid):
+    try:
+        t = Thread.objects.get(pk = int(tid))
+        return (True,{'id':t.id,
+                      'title':t.title,
+                      'domain':t.domain.name,
+                      'creator_name':t.creator.user.username,
+                      'creator_id':t.creator.id,
+                      'net_vote':t.up-t.down,
+                      'time':t.time_created,
+                      'num_comment':len(Comment.objects.filter(thread = t))})
     except:
         connection._rollback()
         return (False,str(traceback.format_exc()))
