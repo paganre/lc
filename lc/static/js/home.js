@@ -54,9 +54,9 @@ function openQuickComment(id){
     qcd = $("#qcd"+id);
     qcd.toggleClass("dp-none");
     if(qcd.hasClass("dp-none")){
-	$("#qct"+id).html("Quick-comment");
+	$("#qct"+id).html("Hizlica-bi-yorum-yaz");
     }else{
-	$("#qct"+id).html("Cancel");
+	$("#qct"+id).html("Salla");
     }
 }
 
@@ -80,7 +80,7 @@ function login(){
 	$("#login-container").removeClass("dp-none");
 	h = $(window).height();
 	if($("#login-modal").height() < h){
-	    $("#login-modal").css("top", (h-$("#login-modal").height())/4);
+	    $("#login-modal").css("top","50px");
 	}
     }
     return false;

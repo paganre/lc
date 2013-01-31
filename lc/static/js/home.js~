@@ -37,7 +37,7 @@ function getNewComment(cid,tid){
                 response = JSON.parse(response);
                 if(response.result == 0){
                     if(has_panel == 1){
-			$("#cp"+tid).append(response.html);
+			$("#cmore"+tid).prepend(response.html);
 		    }else{
 			$("#qcparent"+tid).prepend(response.html);
 		    }
@@ -54,9 +54,9 @@ function openQuickComment(id){
     qcd = $("#qcd"+id);
     qcd.toggleClass("dp-none");
     if(qcd.hasClass("dp-none")){
-	$("#qct"+id).html("Quick-comment");
+	$("#qct"+id).html("Hizlica-bi-yorum-yaz");
     }else{
-	$("#qct"+id).html("Cancel");
+	$("#qct"+id).html("Salla");
     }
 }
 

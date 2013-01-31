@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>Les Comments</title>
+  <title>LC - {{header.title}}</title>
   <link href="/static/lc/stylesheets/app.css" media="screen, projector, print" rel="stylesheet" type="text/css" />
   <link href="/static/lc/stylesheets/general_foundicons.css" media="screen, projector, print" rel="stylesheet" type="text/css" />
   <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
@@ -8,12 +8,13 @@
 </head>
 <body>
   {% include "topbar.html" %}
-  {% for header in headers %}
-   {% include "main_item.html" with header=header %}
-  {% endfor %}
+  {% include "main_item.html" with header=header %}
+  
+  
+    
   {% include "login.html" %}
 <script>
-  $.ajaxSetup({ 
+  $.ajaxSetup({
      beforeSend: function(xhr, settings) {
          function getCookie(name) {
              var cookieValue = null;
@@ -34,8 +35,8 @@
              // Only send the token to relative URLs i.e. locally.
              xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
          }
-     } 
-				   });
+     }
+                                   });
 </script>
 
 </body>

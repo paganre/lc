@@ -1,0 +1,59 @@
+function getPrettyDate(time){
+    now = new Date().getTime();
+
+    sec = (now-time)/1000;
+
+    if(sec < 5){
+	return "just now";
+    }else if(sec < 10){
+	return "few seconds ago";
+    }else if(sec < 60){
+	return "under a minute ago";
+    }
+    
+    min = sec / 60;
+    if(Math.round(min) == 1){
+	return "a minute ago";
+    }else if(min < 5){
+	return "few minutes ago";
+    }else if(min < 60){
+	return Math.round(min) + " minutes ago";
+    }
+    
+    hour = min / 60;
+    if(Math.round(hour) == 1){
+	return "an hour ago";
+    }else if (hour < 24){
+	return Math.round(hour) + " hours ago";
+    }
+
+    day = hour / 24;
+    if (Math.round(day) == 1){
+	return "a day ago";
+    }else if(Math.round(day) < 7){
+	return Math.round(day)+ " days ago";
+    }
+
+    week = day / 7;
+    if (Math.round(week) == 1){
+	return "a week ago";
+    }else if(Math.round(week) < 5){
+	return Math.round(week)+ " weeks ago";
+    }
+    
+    month = day / 30;
+    if (Math.round(month) == 1){
+	return "a month ago";
+    }else if(month < 12){
+	return Math.round(month)+ " months ago";
+    }
+
+    year = month / 12;
+    if (Math.round(year) == 1){
+	return "a year ago";
+    }else{
+	return Math.round(year)+ " years ago";
+    }
+
+    return "a long time ago, in a galaxy far, far away..."; 
+}

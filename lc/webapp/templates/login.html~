@@ -17,7 +17,10 @@
                 </div>
                     
                 <a id="login-button" class="secondary small button">Login</a>
-                
+                <div id="login-error" class="alert-box alert dp-none" style="margin-top:10px;font-size:12px;">
+		  
+		</div>
+
             </div>
                 
             <div class="six mobile-one columns" style="padding: 9px 15px;border-left: solid 1px #aaa;">
@@ -41,6 +44,9 @@
                         
                     <a id="register-button" class="secondary small button">Register</a>
                     
+		    <div id="register-error" class="alert-box alert dp-none" style="margin-top:10px;font-size:12px;">
+
+                    </div>
                 </div>
             </div>
       </div>

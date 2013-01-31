@@ -26,9 +26,12 @@ from django.http import Http404
 def thread(request,tid):
     try:
         th = t.get_full_thread(int(tid))
-        return HttpResponse(json.dumps(th))
+        if(th[0]):
+            return render_to_response('thread.html',{"user": request.user,"header":th[1],"subs":th[2]},context_instance=RequestContext(request))
+        else:
+            return HttpResponse(th[1])
     except:
-        raise Http404
+        return HttpResponse(str(traceback.format_exc()))
 
 @csrf_protect
 def retrieve(request):

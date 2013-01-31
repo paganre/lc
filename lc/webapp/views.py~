@@ -15,11 +15,23 @@ import requests
 from django.template.loader import get_template
 from django.template import Context
 from webapp import alfred
+from django.http import Http404
 
 # Common site request forgery protection risk
 # Request is obtained from the login.html via POST
 # I am using both CSRF Middleware and csrf_protect() for extra security
 # More info: https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
+
+@csrf_protect
+def thread(request,tid):
+    try:
+        th = t.get_full_thread(int(tid))
+        if(th[0]):
+            return render_to_response('thread.html',{"user": request.user,"header":th[1],"subs":subs},context_instance=RequestContext(request))
+        else:
+            return HttpResponse(th[1])
+    except:
+        raise Http404
 
 @csrf_protect
 def retrieve(request):

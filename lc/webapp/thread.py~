@@ -1,5 +1,6 @@
 from webapp.models import Thread,Domain,LcUser,Comment
 from webapp import comment as c
+from webapp.struct.subthread import Subthread
 from django.db import connection
 from time import time
 import traceback
@@ -11,9 +12,19 @@ def generateId():
 def get_full_thread(tid):
     try:
         t = Thread.objects.get(pk = int(tid))
-        cs = Comment.objects.filter(thread = t)
-        comments = c.get_comment_fields(cs)
+        all_comments = Comment.objects.filter(thread = t).order_by('time_created') # old-to-new ordering: should preserve subthreading logic
+        subs = []
+        # create the subthread trees here
+        for c in all_comments:
+            if c.parent == None:
+                subs.append(Subthread(c,[]))
+            else:
+                for s in subs:
+                    if(s.insertChildTo(c.parent.id,Subthread(c,[]))):
+                        break
+
         return (True,{'id':t.id,
+                      'url':t.url,
                       'title':t.title,
                       'domain':t.domain.name,
                       'creator_name':t.creator.user.username,
@@ -21,7 +32,7 @@ def get_full_thread(tid):
                       'net_vote':t.up-t.down,
                       'time':t.time_created,
                       'num_comment':len(Comment.objects.filter(thread = t)),
-                      'comments':comments})
+                      },subs)
     except:
         connection._rollback()
         return (False,str(traceback.format_exc()))
@@ -30,6 +41,7 @@ def get_thread_header(tid):
     try:
         t = Thread.objects.get(pk = int(tid))
         return (True,{'id':t.id,
+                      'url':t.url,
                       'title':t.title,
                       'domain':t.domain.name,
                       'creator_name':t.creator.user.username,
