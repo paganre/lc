@@ -21,7 +21,7 @@
 	  {% if header.comments and header.comments|length > 0 %}
 	  <div class="panel" id="cp{{header.id}}"  style="padding:10px !important; margin-bottom:0px !important; padding-bottom:20px !important; margin-top:10px; max-width:500px; font-size:12px !important;">
 	    <a href="#" onclick="toggleComment({{header.id}});return false;" class="toggle-comment-panel" id="tcp{{header.id}}" style="color: black;">
-	      <i id="tci{{header.id}}" class="general foundicon-minus" style="float: left;"></i>
+	      <i id="tci{{header.id}}" class="general foundicon-minus" style="float: left; font-size:9px;"></i>
 	    </a>
 	    {% for c in header.comments %}
 	    {% if forloop.counter0 == 0 %}

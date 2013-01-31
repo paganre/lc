@@ -43,7 +43,6 @@
 	  </div>  
 	  {% endif %}
 	    
-	  {% if header.comments %}
 	  <div id="qcparent{{header.id}}" style="margin-top: 5px;
 		      font-size: 12px;
 		      font-weight: bold;
@@ -55,7 +54,7 @@
 	      <span id="qclabel{{header.id}}" class="secondary label dp-none"></span>
 	    </div>
 	  </div>
-	  {% endif %}
+	  
 
 	</div>
       </div>

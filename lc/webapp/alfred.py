@@ -7,7 +7,7 @@ def get_main():
     """
     returns an array of sorted thread ids - sorting logic to be added
     """
-    return [t.id for t in Thread.objects.all()[:20]]
+    return [t.id for t in Thread.objects.all().order_by('-time_created')[:50]]
 
 
 def get_best_subthread(tid):
