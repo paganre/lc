@@ -1,9 +1,9 @@
 {% if page == "home" and has_panel == 0 %}
-<div class="panel" id="cp{{tid}}"  style="padding:10px !important; margin-bottom:0px !important; padding-bottom:20px !important; margin-top:10px; max-width:500px; font-size:12px !important;">
+<div class="panel" id="cp{{tid}}"  style="padding:10px !important; margin-bottom:0px !important; padding-bottom:20px !important; margin-top:10px; font-weight:normal; max-width:500px; font-size:12px !important;">
   <a href="#" onclick="toggleComment({{tid}});return false;" class="toggle-comment-panel" id="tcp{{tid}}" style="color: black;">
     <i id="tci{{tid}}" class="general foundicon-minus" style="float: left;"></i>
   </a>
-  <div id="cpd{{header.id}}" style="margin-left:15px;padding:5px 5px;">
+  <div id="cpd{{tid}}" style="margin-left:15px;padding:5px 5px;">
 {% else %}
   <div style="margin-left:15px;padding:5px 5px;">
 {% endif %}

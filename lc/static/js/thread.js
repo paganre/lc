@@ -1,3 +1,22 @@
+function highlight(){
+    id = $(this).attr('id').substring(6);
+    $("#com"+id).css("background","white");
+}
+function removeHighlight(){
+    id = $(this).attr('id').substring(6);
+    $("#com"+id).css("background","");
+}
+
+function toggleComment(id){
+    $("#com"+id).toggleClass("comment-hidden");
+    if($("#com"+id).hasClass("comment-hidden")){
+	$("#togcom"+id).html("[ac]");
+    }else{
+	$("#togcom"+id).html("[kapa]");
+    }
+    return false;
+}
+
 function toggleReply(id){
     $("#rpl-wrap"+id).toggleClass("dp-none");
     if($("#rpl-wrap"+id).hasClass("dp-none")){
@@ -23,9 +42,29 @@ function sendReply(tid,id){
                 response = JSON.parse(response);
                 if(response.result == 0){
                     $("#rpllabel"+id).html("cevap eklendi");
-                    
+		    appendComment(response.id,tid,id);
                 }else{
                     $("#rpllabel"+id).html("bi sorun cikti: "+response.error);
+                }
+
+            }
+        });
+}
+
+function appendComment(cid,tid,pid){
+    $.ajax({
+            url: '/retrieve/',
+                type: 'POST',
+                data: {'type':'comment','page':'thread','id':cid,'tid':tid},
+                success: function(response) {
+                response = JSON.parse(response);
+                if(response.result == 0){
+                    $("#com"+pid).append(response.html);
+		    if(!$("#rpl-wrap"+pid).hasClass("dp-none")){
+			toggleReply(pid);
+		    }
+		}else{
+                    $("#rpllabel"+pid).html("bi problem cikti: "+response.error);
                 }
 
             }

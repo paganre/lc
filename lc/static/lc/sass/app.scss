@@ -96,6 +96,13 @@
 	text-shadow:0em 0em white;
 }
 
+.comment-hidden{
+	max-height:20px !important;
+	overflow:hidden !important;
+}
+.comment-wrap .comment-toggler:hover{
+	background:white;
+}
 
 @font-face {
   font-family: 'GeneralFoundicons';

@@ -41,7 +41,7 @@ def thread(request,tid):
                         next_level = subthread[i+1][1]
                         sub.append([comment,range(current_level - next_level +1)])
                 comments.append(sub)
-            return render_to_response('thread.html',{"user": request.user,"header":th[1],"threads":comments},context_instance=RequestContext(request))
+            return render_to_response('thread.html',{"user": request.user,"header":th[1],"threads":comments,"tid":tid},context_instance=RequestContext(request))
         else:
             return HttpResponse(th[1])
     except:

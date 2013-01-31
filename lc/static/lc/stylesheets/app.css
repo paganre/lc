@@ -5995,6 +5995,17 @@ table.hide-for-medium {
   text-shadow: 0em 0em white;
 }
 
+/* line 99, ../sass/app.scss */
+.comment-hidden {
+  max-height: 20px !important;
+  overflow: hidden !important;
+}
+
+/* line 103, ../sass/app.scss */
+.comment-wrap .comment-toggler:hover {
+  background: white;
+}
+
 @font-face {
   font-family: 'GeneralFoundicons';
   src: url("fonts/general_foundicons.eot");
@@ -6003,7 +6014,7 @@ table.hide-for-medium {
   font-style: normal;
 }
 
-/* line 111, ../sass/app.scss */
+/* line 118, ../sass/app.scss */
 [class*="foundicon-"] {
   display: inline;
   width: auto;
@@ -6015,7 +6026,7 @@ table.hide-for-medium {
   background-repeat: repeat;
 }
 
-/* line 122, ../sass/app.scss */
+/* line 129, ../sass/app.scss */
 [class*="general foundicon-"]:before {
   font-family: "GeneralFoundicons";
   font-weight: normal;

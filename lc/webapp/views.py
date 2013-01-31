@@ -66,11 +66,11 @@ def retrieve(request):
             context.update({'c':comment})
             page = request.POST.get('page','')
             context.update({'page':page})
+            tid = int(request.POST.get('tid',''))
+            context.update({'tid':tid})
             if page == 'home':
                 has_panel = int(request.POST.get('has_panel',''))
-                tid = int(request.POST.get('tid',''))
                 context.update({'has_panel':has_panel})
-                context.update({'tid':tid})
             t = get_template('generic/comment.html')
             html = t.render(Context(context))
             return HttpResponse(json.dumps({'result':0,'html':html}))

@@ -1,5 +1,5 @@
 function toggleReply(id){
-    $("#rpl-wrap").toggleClass("dp-none");
+    $("#rpl-wrap"+id).toggleClass("dp-none");
     if($("#rpl-wrap"+id).hasClass("dp-none")){
 	$("#rpl"+id).html("cevap-yaz");
     }else{
@@ -12,19 +12,40 @@ function sendReply(tid,id){
     if(text == ""){
 	return false;
     }
-    $("#qclabel"+id).removeClass("dp-none");
-    $("#qclabel"+id).html("yollaniyo...");
+    $("#rpl-field"+id).val('');
+    $("#rpllabel"+id).removeClass("dp-none");
+    $("#rpllabel"+id).html("yollaniyo...");
     $.ajax({
-            url: 'scribe/',
+            url: '/scribe/',
                 type: 'POST',
                 data: {'text':text,'tid':tid,'parent':id},
                 success: function(response) {
                 response = JSON.parse(response);
                 if(response.result == 0){
                     $("#rpllabel"+id).html("cevap eklendi");
-                    getNewComment(response.id,id);
+		    appendComment(response.id,tid,id);
                 }else{
                     $("#rpllabel"+id).html("bi sorun cikti: "+response.error);
+                }
+
+            }
+        });
+}
+
+function appendComment(cid,tid,pid){
+    $.ajax({
+            url: '/retrieve/',
+                type: 'POST',
+                data: {'type':'comment','page':'thread','id':cid,'tid':tid},
+                success: function(response) {
+                response = JSON.parse(response);
+                if(response.result == 0){
+                    $("#com"+pid).append(response.html);
+		    if(!$("#rpl-wrap"+pid).hasClass("dp-none")){
+			toggleReply(pid);
+		    }
+		}else{
+                    $("#rpllabel"+pid).html("bi problem cikti: "+response.error);
                 }
 
             }
