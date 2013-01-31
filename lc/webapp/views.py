@@ -65,7 +65,7 @@ def retrieve(request):
 
 @csrf_protect
 def scribe(request):
-    if request.user and request.user.is_authenticated and 'uid' in request.session:
+    if request.user and request.user.is_authenticated() and 'uid' in request.session:
         try:
             tid = int(request.POST.get('tid',''))
             text = request.POST.get('text','')
@@ -99,14 +99,14 @@ def home(request):
 
 @csrf_protect
 def submit(request):
-    if request.user and request.user.is_authenticated:
+    if request.user and request.user.is_authenticated():
         return render_to_response('submit.html',{"user": request.user},context_instance=RequestContext(request))
     else:
         return HttpResponseRedirect("/")
 
 @csrf_protect
 def link(request):
-    if request.user and request.user.is_authenticated:
+    if request.user and request.user.is_authenticated():
         link_ = request.POST.get('link','')
         # head request to link
         if not (link_.startswith('http://') or link_.startswith('https://')):
@@ -138,7 +138,7 @@ def link(request):
 
 @csrf_protect
 def create(request):
-    if request.user and request.user.is_authenticated:
+    if request.user and request.user.is_authenticated():
         link = request.POST.get('link','')
         title = request.POST.get('title','')
         suggested = request.POST.get('suggested','')
