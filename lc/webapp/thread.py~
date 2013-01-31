@@ -23,6 +23,11 @@ def get_full_thread(tid):
                     if(s.insertChildTo(c.parent.id,Subthread(c,[]))):
                         break
 
+        # convert trees to traversed lists
+        comments = []
+        for s in subs:
+            comments.append(s.toList(0,[]))
+
         return (True,{'id':t.id,
                       'url':t.url,
                       'title':t.title,
@@ -32,7 +37,7 @@ def get_full_thread(tid):
                       'net_vote':t.up-t.down,
                       'time':t.time_created,
                       'num_comment':len(Comment.objects.filter(thread = t)),
-                      },subs)
+                      },comments)
     except:
         connection._rollback()
         return (False,str(traceback.format_exc()))
@@ -69,4 +74,11 @@ def create_thread(creator_id, title, suggested_title, domain, url):
         return (True,tid) # thread created - return thread id
     except:
         connection._rollback()
-        return (False,str(traceback.format_exc()))        
+        return (False,str(traceback.format_exc()))
+
+def check_domain_stitle(sugg_title, dom):
+    qSetCard = Thread.objects.filter(suggested_title = sugg_title, domain = dom).count()
+    if qSetCard == 1:
+        return (qSetCard, Thread.objects.get(suggested_title = sugg_title, domain = dom).id)
+    else:
+        return (qSetCard, 0)

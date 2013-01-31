@@ -1,3 +1,72 @@
+function upvote(id){
+    c = 0;
+    // check if already upvoted
+    if($("#up"+id).hasClass("up-voted")){
+	vote = 0;
+	c = -1;
+    }else{
+	vote = 1;
+	c = 1;
+    }
+    $("#up"+id).toggleClass("up-voted");
+    if($("#down"+id).hasClass("down-voted")){
+	$("#down"+id).removeClass("down-voted");
+	c = c+1;
+    }
+    $.ajax({
+            url: '/vote/',
+                type: 'POST',
+                data: {'cid':id,'vote':vote},
+                success: function(response) {
+                response = JSON.parse(response);
+                if(response.result == 0){
+
+                }else{
+		    alert(response.error);
+                }
+            }
+        });
+    changeCount(id,c);
+}
+
+function downvote(id){
+    c = 0;
+    // check if already downvoted                                                                                                                                                
+    if($("#down"+id).hasClass("down-voted")){
+        vote = 0;
+	c = 1;
+    }else{
+        vote = -1;
+	c = -1;
+    }
+    $("#down"+id).toggleClass("down-voted");
+    if($("#up"+id).hasClass("up-voted")){
+	$("#up"+id).removeClass("up-voted");//just-in-case
+	c = c-1;
+    }
+    $.ajax({
+            url: '/vote/',
+                type: 'POST',
+                data: {'cid':id,'vote':vote},
+                success: function(response) {
+                response = JSON.parse(response);
+                if(response.result == 0){
+
+                }else{
+		    alert(response.error);
+                }
+            }
+        });
+    changeCount(id,c);
+}
+
+function changeCount(id,c){
+    vraw = $("#comvote"+id).html();
+    v = parseInt(vraw.substring(1,vraw.length-1));
+    v = v +c ;
+    $("#comvote"+id).html('['+v+']');
+}
+
 function highlight(){
     id = $(this).attr('id').substring(6);
     $("#com"+id).css("background","white");

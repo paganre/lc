@@ -24,12 +24,28 @@ from django.http import Http404
 # More info: https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
 
 @csrf_protect
+def vote(request):
+    if request.user and request.user.is_authenticated() and 'uid' in request.session:
+        try:
+            cid = int(request.POST.get('id',''))
+            vote = int(request.POST.get('vote',''))
+            user.vote(int(request.session['uid']),cid,vote)
+            return HttpResponse(json.dumps({'result':0}))
+        except:
+            return HttpResponse(json.dumps({'result':-1,'error':str(traceback.format_exc())}))
+    else:
+        return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
+
+@csrf_protect
 def thread(request,tid):
     try:
         th = t.get_full_thread(int(tid))
         if(th[0]):
             # adjust </div> ranges
             comments = []
+            votes = [0] * len(th[3])
+            if 'uid' in request.session:
+                
             for subthread in th[2]:
                 sub = []
                 for i,c_ in enumerate(subthread):
@@ -66,11 +82,11 @@ def retrieve(request):
             context.update({'c':comment})
             page = request.POST.get('page','')
             context.update({'page':page})
+            tid = int(request.POST.get('tid',''))
+            context.update({'tid':tid})
             if page == 'home':
                 has_panel = int(request.POST.get('has_panel',''))
-                tid = int(request.POST.get('tid',''))
                 context.update({'has_panel':has_panel})
-                context.update({'tid':tid})
             t = get_template('generic/comment.html')
             html = t.render(Context(context))
             return HttpResponse(json.dumps({'result':0,'html':html}))

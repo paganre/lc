@@ -24,16 +24,43 @@ from django.http import Http404
 # More info: https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
 
 @csrf_protect
+def vote(request):
+    if request.user and request.user.is_authenticated() and 'uid' in request.session:
+        try:
+            cid = int(request.POST.get('cid',''))
+            vote = int(request.POST.get('vote',''))
+            out = user.vote(int(request.session['uid']),cid,vote)
+            if not out[0]:
+                return HttpResponse(json.dumps({'result':-1,'error':out[1]}))
+            return HttpResponse(json.dumps({'result':0}))
+        except:
+            return HttpResponse(json.dumps({'result':-1,'error':str(traceback.format_exc())}))
+    else:
+        return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
+
+@csrf_protect
 def thread(request,tid):
     try:
         th = t.get_full_thread(int(tid))
         if(th[0]):
             # adjust </div> ranges
             comments = []
+            votes = [0] * len(th[3])
+            if 'uid' in request.session:
+                res = user.did_vote(int(request.session['uid']),th[3])
+                if res[0]:
+                    votes = res[1]
+                    
             for subthread in th[2]:
                 sub = []
                 for i,c_ in enumerate(subthread):
                     comment = c.comment_to_dict(c_[0])
+                    if 'uid' in request.session:
+                        ind = th[3].index(c_[0].id)
+                        if votes[ind] == 1:
+                            comment.update({'up':'up-voted'})
+                        elif votes[ind] == -1:
+                            comment.update({'down':'down-voted'})
                     current_level = c_[1]
                     if i == len(subthread)-1:
                         sub.append([comment,range(current_level+1)])

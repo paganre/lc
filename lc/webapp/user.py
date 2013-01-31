@@ -1,10 +1,56 @@
 from django.contrib.auth.models import User
-from webapp.models import LcUser
+from webapp.models import LcUser,Comment
 from django.db import connection
 from time import time
 from django.contrib import auth
 import traceback
 import os
+import redis
+from django.db.models import F
+
+def did_vote(uid,cids):
+    """
+    returns -1,0,1 for downvote,notvoted,upvote for given u(ser)id and c(omment)ids
+    """
+    try:
+        r = redis.Redis()
+        votes = r.hmget('v:'+str(uid),[str(cid) for cid in cids])
+        out = []
+        for vote in votes:
+            if vote == None:
+                out.append(0)
+            else:
+                out.append(int(vote))
+        return (True,out)
+    except:
+        return (False,str(traceback.format_exc()))
+        
+def vote(uid,cid,vote):
+    """
+    add user vote (! changes both redis and postgres !)
+    """
+    try:
+        r = redis.Redis()
+        v = r.hget('v:'+str(uid),str(cid))
+        if v == None:
+            v = 0
+        else:
+            v = int(v)
+        if v == vote:
+            return (True,'') # no need to change - same vote - should never be possible
+        r.hset('v:'+str(uid),str(cid),vote)
+        if v == 1:
+            Comment.objects.filter(id=int(cid)).update(up=F('up')-1)
+        elif v == -1:
+            Comment.objects.filter(id=int(cid)).update(down=F('down')-1)
+        if vote == 1:
+            Comment.objects.filter(id=int(cid)).update(up=F('up')+1)
+        elif vote == -1:
+            Comment.objects.filter(id=int(cid)).update(down=F('down')+1)
+        return (True,'')
+    except:
+        connection._rollback()
+        return (False,str(traceback.format_exc()))
 
 def login(request,username,password):
     try:

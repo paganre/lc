@@ -10,7 +10,7 @@ urlpatterns = patterns('',
     url(r'^logout/$', 'webapp.views.logoutUser'),
     url(r'^scribe/$','webapp.views.scribe'),               
     url(r'^retrieve/$','webapp.views.retrieve'),
-    url(r'^thread/(?P<tid>\d+)','webapp.views.thread'),
+    url(r'^t/(?P<tid>\d+)','webapp.views.thread'),
 )
 
 

@@ -6006,6 +6006,16 @@ table.hide-for-medium {
   background: white;
 }
 
+/* line 106, ../sass/app.scss */
+.up-voted {
+  color: royalblue !important;
+}
+
+/* line 109, ../sass/app.scss */
+.down-voted {
+  color: darkred !important;
+}
+
 @font-face {
   font-family: 'GeneralFoundicons';
   src: url("fonts/general_foundicons.eot");
@@ -6014,7 +6024,7 @@ table.hide-for-medium {
   font-style: normal;
 }
 
-/* line 118, ../sass/app.scss */
+/* line 124, ../sass/app.scss */
 [class*="foundicon-"] {
   display: inline;
   width: auto;
@@ -6026,7 +6036,7 @@ table.hide-for-medium {
   background-repeat: repeat;
 }
 
-/* line 129, ../sass/app.scss */
+/* line 135, ../sass/app.scss */
 [class*="general foundicon-"]:before {
   font-family: "GeneralFoundicons";
   font-weight: normal;
