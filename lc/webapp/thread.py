@@ -74,4 +74,11 @@ def create_thread(creator_id, title, suggested_title, domain, url):
         return (True,tid) # thread created - return thread id
     except:
         connection._rollback()
-        return (False,str(traceback.format_exc()))        
+        return (False,str(traceback.format_exc()))
+
+def check_domain_stitle(sugg_title, dom):
+    qSetCard = Thread.objects.filter(suggested_title = sugg_title, domain = dom).count()
+    if qSetCard == 1:
+        return (qSetCard, Thread.objects.get(suggested_title = sugg_title, domain = dom).id)
+    else:
+        return (qSetCard, 0)
