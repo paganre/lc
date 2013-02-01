@@ -1,0 +1,8 @@
+<div style="margin-top: 10px;">
+  <div>[ les étiquette ]</div>
+  {% for tag in tags %}
+  <div style="margin-top: 8px; margin-left: 10px;">
+    <a href="/tag/{{tag.id}}" class="lc-top-link" style="color: royalblue !important; text-decoration: underline;">#{{tag.name}} [{{tag.thread_count}}]</a>
+  </div>
+  {% endfor %}
+</div>

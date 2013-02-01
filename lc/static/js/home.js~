@@ -1,3 +1,46 @@
+function toggleInlineTag(id){
+    $("#tagwrap"+id).toggleClass("dp-none");
+    if($("#tagwrap"+id).hasClass("dp-none")){
+	$("#tagopen"+id).html("etiketle");
+    }else{
+	$("#tagopen"+id).html("salla");
+	$("#tagalert"+id).addClass('dp-none');
+    }
+    return false;
+}
+
+function tag(id){
+    val = $("#tagfield"+id).val().trim();
+    $("#tagfield"+id).val('');
+    if(val != ''){
+	toggleInlineTag(id);
+	$("#tagalert"+id).html('oluyo');
+	$("#tagalert"+id).removeClass('dp-none');
+	$("#tagopen"+id).addClass('dp-none');
+	$.ajax({
+		url: '/tag/',
+		    type: 'POST',
+		    data: {'tid':id,'tag':val},
+		    success: function(response) {
+		    response = JSON.parse(response);
+		    if(response.result == 0){
+			$("#tagalert"+id).html('oldu');
+			setTimeout(function(){tagEnable(id);},2000);
+		    }else{
+			$("#tagalert"+id).html('olmadi: '+response.error);
+			setTimeout(function(){tagEnable(id);},2000);
+		    }
+		}
+	    });
+    }
+    return false;
+}
+
+function tagEnable(id){
+    $("#tagopen"+id).removeClass("dp-none");
+    $("#tagalert"+id).addClass("dp-none");
+}
+
 function removeNot(cid){
     $.ajax({
             url: '/remnot/',
@@ -16,7 +59,7 @@ function checkNot(){
                 if(response.result == 0){
                     dispNot(response.html);
                 }else{
-		    //alert(response.e);
+                    //alert(response.e);
                 }
 
             }
@@ -119,7 +162,7 @@ function loginWith(){
     name = $("#nickname").val();
     password = $("#password").val();
     $.ajax({
-            url: 'login/',
+            url: '/login/',
 		type: 'POST',
 		data: {'username':name,'password':password},
                 success: function(response) {
@@ -148,7 +191,7 @@ function register(){
     password = $("#rpassword").val();
     email = $("#remail").val();
     $.ajax({
-            url: 'register/',
+            url: '/register/',
                 type: 'POST',
                 data: {'username':name,'password':password,'email':email},
                 success: function(response) {

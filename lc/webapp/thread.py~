@@ -5,9 +5,19 @@ from django.db import connection
 from time import time
 import traceback
 import os
+from django.db.models import F
+from webapp import alfred
+from webapp import tagger
 
 def generateId():
     return int(os.urandom(4).encode('hex'),16) / 2
+
+def increment_view_count(tid):
+    try:
+        Thread.objects.filter(pk = int(tid)).update(views = F('views')+1)
+        return True
+    except:
+        return False
 
 def get_full_thread(tid):
     try:
@@ -25,6 +35,8 @@ def get_full_thread(tid):
                     if(s.insertChildTo(c.parent.id,Subthread(c,[]))):
                         break
 
+        if not alfred.subthread_sort(subs):
+            return (False,str(traceback.format_exc()))
         # convert trees to traversed lists
         comments = []
         for s in subs:

@@ -7,6 +7,7 @@ import traceback
 import os
 from django.db.models import F
 from webapp import alfred
+from webapp import tagger
 
 def generateId():
     return int(os.urandom(4).encode('hex'),16) / 2
@@ -66,6 +67,7 @@ def get_thread_header(tid):
                       'creator_id':t.creator.id,
                       'net_vote':t.up-t.down,
                       'time':t.time_created,
+                      'tags':tagger.get_tags(int(tid)),
                       'num_comment':len(Comment.objects.filter(thread = t))})
     except:
         connection._rollback()

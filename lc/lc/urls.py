@@ -15,6 +15,8 @@ urlpatterns = patterns('',
     url(r'^notif/$','webapp.views.notif'),               
     url(r'^remnot/$','webapp.views.rem_notif'),
     url(r'^u/(?P<username>\w+)','webapp.views.userpage'),
+    url(r'^tag/$','webapp.views.tag'),
+    url(r'^tag/(?P<tagid>\d+)','webapp.views.get_tag'),
 )
 
 

@@ -9,10 +9,15 @@
 <body>
   {% include "topbar.html" %}
   <div class="row">
-    <div class="two columns" id="left-bar"></div>
+    <div class="two columns" id="left-bar" style="padding:10px">
+      {% include "left-pad/sorting.html" %}
+      {% if tags|length > 0 %}
+       {% include "left-pad/tags.html" with tags=tags %}
+      {% endif %}
+    </div>
     <div class="seven mobile-four columns" style="padding: 2px 2px;">
   {% for header in headers %}
-   {% include "main_item.html" with header=header %}
+   {% include "main_item.html" with header=header uid=uid %}
   {% endfor %}
     </div>
     <div class="three columns" id="right-bar"></div>
