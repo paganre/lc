@@ -7,7 +7,7 @@ function checkNot(){
                 if(response.result == 0){
                     dispNot(response.html);
                 }else{
-		    alert(response.result);
+		    //alert(response.e);
                 }
 
             }

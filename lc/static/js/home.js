@@ -1,3 +1,12 @@
+function removeNot(cid){
+    $.ajax({
+            url: '/remnot/',
+                type: 'POST',
+                data: {'cid':cid},
+                success: function(response){}});
+    $("#notitem"+cid).remove();
+}
+
 function checkNot(){
     $.ajax({
             url: '/notif/',

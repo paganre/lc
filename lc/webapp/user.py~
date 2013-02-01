@@ -8,6 +8,31 @@ import os
 import redis
 from django.db.models import F
 
+def notify(uid,cid):
+    """
+    notify user about a reply to his-her comment from another user
+    """
+    try:
+        r = redis.Redis()
+        r.zadd('not:'+str(uid),str(cid),int(time()))
+    except:
+        return None # fail silent - not a big deal
+
+def get_notifs(uid):
+    try:
+        r = redis.Redis()
+        notifs = r.zrange('not:'+str(uid),0,-1,withscores=True)
+        return notifs
+    except:
+        return []
+
+def del_notif(uid,cid):
+    try:
+        r = redis.Redis()
+        r.zrem('not:'+str(uid),str(cid))
+    except:
+        return None
+
 def did_vote(uid,cids):
     """
     returns -1,0,1 for downvote,notvoted,upvote for given u(ser)id and c(omment)ids

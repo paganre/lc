@@ -1,4 +1,4 @@
-function sendQuickComment(id){
+function sendComment(id){
     text = $("#qcf"+id).val();
     if(text.trim() == ""){
         return false;
@@ -31,11 +31,7 @@ function getNewSubthread(cid,tid){
                 success: function(response) {
                 response = JSON.parse(response);
                 if(response.result == 0){
-                    if(has_panel == 1){
-                        $("#cmore"+tid).prepend(response.html);
-                    }else{
-                        $("#qcparent"+tid).prepend(response.html);
-                    }
+                    $("#subthread-wrap").prepend(response.html);
                 }else{
                     $("#qclabel"+tid).html("bi problem cikti: "+response.error);
                 }
@@ -111,6 +107,12 @@ function changeCount(id,c){
     v = parseInt(vraw.substring(1,vraw.length-1));
     v = v +c ;
     $("#comvote"+id).html('['+v+']');
+}
+
+function highlightComment(id){
+    $(window).scrollTo($("#com"+id),800);
+    $("#comtext"+id).css("color","royalblue");
+    $("#comuser"+id).css("color","royalblue");
 }
 
 function highlight(){

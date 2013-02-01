@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     url(r'^retrieve/$','webapp.views.retrieve'),
     url(r'^t/(?P<tid>\d+)','webapp.views.thread'),
     url(r'^vote/$','webapp.views.vote'),
+    url(r'^notif/$','webapp.views.notif'),                
 )
 
 

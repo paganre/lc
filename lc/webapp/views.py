@@ -24,6 +24,19 @@ from django.http import Http404
 # I am using both CSRF Middleware and csrf_protect() for extra security
 # More info: https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
 
+@csrf_protect
+def rem_notif(request):
+    if request.user and request.user.is_authenticated() and 'uid' in request.session:
+        try:
+            uid = int(request.session['uid'])
+            cid = int(request.POST.get('cid',''))
+            user.del_notif(uid,cid)
+            return HttpResponse(json.dumps({'result':0}))
+        except:
+            return HttpResponse(json.dumps({'result':-1,'error':str(traceback.format_exc())}))
+    else:
+        return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
+
 def notif(request):
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
         try:
@@ -35,13 +48,16 @@ def notif(request):
                 c = Comment.objects.get(pk = cid)
                 context = {"creator":c.creator.user.username,
                            "tid":c.thread.id,
-                           "title":c.thread.title}
+                           "title":c.thread.title,
+                           "cid":c.id}
                 html += t.render(Context(context))
             return HttpResponse(json.dumps({'result':0,'html':html}))
         except:
             return HttpResponse(json.dumps({'result':-1,'error':str(traceback.format_exc())}))
     else:
         return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
+
+
 @csrf_protect
 def vote(request):
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
@@ -87,7 +103,14 @@ def thread(request,tid):
                         next_level = subthread[i+1][1]
                         sub.append([comment,range(current_level - next_level +1)])
                 comments.append(sub)
-            return render_to_response('thread.html',{"user": request.user,"header":th[1],"threads":comments,"tid":tid},context_instance=RequestContext(request))
+            
+            highlight = None
+            n = request.GET.get('not', '')
+            if n != '' and 'uid' in request.session:
+                user.del_notif(int(request.session['uid']),int(n))
+                highlight = int(n)
+                
+            return render_to_response('thread.html',{"user": request.user,"header":th[1],"threads":comments,"tid":tid,"highlight":highlight},context_instance=RequestContext(request))
         else:
             return HttpResponse(th[1])
     except:

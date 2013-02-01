@@ -64,14 +64,26 @@ def vote(uid,cid,vote):
         if v == vote:
             return (True,'') # no need to change - same vote - should never be possible
         r.hset('v:'+str(uid),str(cid),vote)
+        
+        c = Comment.objects.get(pk = int(cid))
+        t = c.thread
+
         if v == 1:
-            Comment.objects.filter(id=int(cid)).update(up=F('up')-1)
+            c.up = c.up - 1
+            t.up = t.up - 1
         elif v == -1:
-            Comment.objects.filter(id=int(cid)).update(down=F('down')-1)
+            c.down = c.down - 1
+            t.down = t.down - 1
         if vote == 1:
-            Comment.objects.filter(id=int(cid)).update(up=F('up')+1)
+            c.up = c.up + 1
+            t.up = t.up + 1
         elif vote == -1:
-            Comment.objects.filter(id=int(cid)).update(down=F('down')+1)
+            c.down = c.down +1
+            t.down = t.down +1
+
+        c.save()
+        t.save()
+
         return (True,'')
     except:
         connection._rollback()

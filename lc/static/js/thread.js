@@ -109,6 +109,16 @@ function changeCount(id,c){
     $("#comvote"+id).html('['+v+']');
 }
 
+function highlightComment(id){
+    offset = $("#comuser"+id).offset();
+    $("html,body").animate({
+	    scrollTop: offset.top,
+		scrollLeft: offset.left
+		});
+    $("#comtext"+id).css("color","royalblue");
+    $("#comuser"+id).css("color","royalblue");
+}
+
 function highlight(){
     id = $(this).attr('id').substring(6);
     $("#com"+id).css("background","white");

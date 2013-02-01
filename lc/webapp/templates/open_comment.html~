@@ -1,16 +1,16 @@
 <div id="com{{c.id}}" class="comment-wrap" style="margin-left:15px;padding:5px 5px;">
- <a id="togcom{{c.id}}" href="#" style="float: left;
-					margin-top: 3px;margin-right: 5px;
-					text-decoration: underline;
-					font-size: 12px;
-					color: royalblue;" onclick="toggleComment({{c.id}});return false;" class="comment-toggler">[kapa]</a>
  <a href="#" onclick="upvote({{c.id}});return false;" style="float: left;color: gray;">
    <i id="up{{c.id}}" class="{{c.up}} general foundicon-up-arrow" style=""></i>
  </a>
- <a href="#" onclick="downvote({{c.id}});return false;" style="float: left;color: gray;">
+ <a href="#" onclick="downvote({{c.id}});return false;" style="float: left;color: gray; margin-right:5px;">
    <i id="down{{c.id}}" class="{{c.down}} general foundicon-down-arrow" style=""></i>
  </a>
- <div style="padding:3px 3px; font-size:12px !important"><div id="comvote{{c.id}}">[{{c.net_vote}}]</div><a href="#" class="lc-top-link"> <strong>{{c.creator_name}}</strong></a> {{c.time}} once</div>
+ <a id="togcom{{c.id}}" href="#" style="float: left;                                        
+					margin-top: 3px;margin-right: 5px; 
+					text-decoration: underline;
+                                        font-size: 12px; 
+                                        color: royalblue;" onclick="toggleComment({{c.id}});return false;" class="comment-toggler">[kapa]</a>
+ <div style="padding:3px 3px; font-size:12px !important"><div id="comvote{{c.id}}" style="font-size:12px; margin-right:2px; float:left;">[{{c.net_vote}}]</div><a href="#" class="lc-top-link"> <strong>{{c.creator_name}}</strong></a> {{c.time}} once</div>
  <div style="padding:3px 3px; font-size:12px !important">{{c.text}}</div>
  <div style="padding:3px 3px; font-size:12px !important">
    <a href="#" id="rpl{{c.id}}" onclick="toggleReply({{c.id}});return false;" style="font-weight:bold !important;" class="lc-top-link">cevap-yaz</a>
