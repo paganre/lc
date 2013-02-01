@@ -5,9 +5,17 @@ from django.db import connection
 from time import time
 import traceback
 import os
+from django.db.models import F
 
 def generateId():
     return int(os.urandom(4).encode('hex'),16) / 2
+
+def increment_view_count(tid):
+    try:
+        Thread.objects.filter(pk = int(tid)).update(views = F('views')+1)
+        return True
+    except:
+        return False
 
 def get_full_thread(tid):
     try:

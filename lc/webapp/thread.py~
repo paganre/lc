@@ -13,9 +13,11 @@ def get_full_thread(tid):
     try:
         t = Thread.objects.get(pk = int(tid))
         all_comments = Comment.objects.filter(thread = t).order_by('time_created') # old-to-new ordering: should preserve subthreading logic
+        ids = []
         subs = []
         # create the subthread trees here
         for c in all_comments:
+            ids.append(c.id)
             if c.parent == None:
                 subs.append(Subthread(c,[]))
             else:
@@ -37,7 +39,7 @@ def get_full_thread(tid):
                       'net_vote':t.up-t.down,
                       'time':t.time_created,
                       'num_comment':len(Comment.objects.filter(thread = t)),
-                      },comments)
+                      },comments,ids)
     except:
         connection._rollback()
         return (False,str(traceback.format_exc()))

@@ -110,6 +110,7 @@ def thread(request,tid):
                 user.del_notif(int(request.session['uid']),int(n))
                 highlight = int(n)
                 
+            t.increment_view_count(int(tid))
             return render_to_response('thread.html',{"user": request.user,"header":th[1],"threads":comments,"tid":tid,"highlight":highlight},context_instance=RequestContext(request))
         else:
             return HttpResponse(th[1])
