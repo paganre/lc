@@ -128,3 +128,15 @@ def logout(request):
         return (True,'')
     except:
         return (False,str(traceback.format_exc()))
+
+def get_commented_threads(uid):
+    try:
+        creator = LcUser.objects.get(pk = int(uid))
+        user_comments = creator.comment_set.all()
+        user_threads = []
+        for c in user_comments:
+            tid = c.thread.id
+            user_threads = user_threads + [tid]
+        return (True, user_threads)
+    except:
+        return (False,str(traceback.format_exc()))

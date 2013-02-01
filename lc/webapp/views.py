@@ -11,6 +11,7 @@ from webapp.aleister import Aleister
 from webapp import thread as t
 from webapp import domain as d
 from webapp import comment as c
+from webapp import user as u 
 import json
 import traceback
 import requests
@@ -73,6 +74,7 @@ def vote(request):
     else:
         return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
 
+
 @csrf_protect
 def thread(request,tid):
     try:
@@ -116,6 +118,22 @@ def thread(request,tid):
             return HttpResponse(th[1])
     except:
         return HttpResponse(str(traceback.format_exc())+"th[2] is :"+str(th[2])+"\r\n\ i was:"+str(i))
+
+@csrf_protect
+def userpage(request,username):
+    if request.user.username==username and request.user.is_authenticated() and 'uid' in request.session:
+        res = u.get_commented_threads(int(request.session['uid']))
+        if res[0]:
+            tids = res[1]
+            headers = [t.get_thread_header(tid) for tid in tids]
+            headers = [h[1] for h in headers if h[0]]
+            for h in headers:
+                h['comments']=[]
+                return render_to_response('userpage.html',{"user": request.user,"headers":headers},context_instance=RequestContext(request))
+        else:
+            return HttpResponse(res[1])
+    else:
+        return HttpResponseRedirect("/")
 
 @csrf_protect
 def retrieve(request):
@@ -176,13 +194,6 @@ def scribe(request):
 
 @csrf_protect
 def home(request):
-    # ---- CRSF Problem Solution -----
-    # Our problem was explained here
-    # http://stackoverflow.com/questions/13412653/django-no-csrftoken-in-cookie
-    # Django doesn't set the CSRF_COOKIE_USED flag if you don't use { % csrf_token % } to create the token
-    # Run get_token command to set the flag
-    csrf_token = get_token(request)
-    # --------------------------------
     tids = alfred.get_main()
     headers = [t.get_thread_header(tid) for tid in tids]
     headers = [h[1] for h in headers if h[0]]

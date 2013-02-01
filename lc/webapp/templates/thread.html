@@ -35,17 +35,12 @@
   <script>
     $(".comment-toggler").mouseenter(highlight);
     $(".comment-toggler").mouseleave(removeHighlight);
-    {% if highlight %}
-    highlightComment({{highlight}});
-    {% endif %}
   </script>
   </div>
   <div class="two columns"></div>
   </div>
 
   {% include "login.html" %}
-
-
 <script>
   $.ajaxSetup({
      beforeSend: function(xhr, settings) {
