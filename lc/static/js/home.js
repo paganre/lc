@@ -119,7 +119,7 @@ function loginWith(){
     name = $("#nickname").val();
     password = $("#password").val();
     $.ajax({
-            url: 'login/',
+            url: '/login/',
 		type: 'POST',
 		data: {'username':name,'password':password},
                 success: function(response) {
