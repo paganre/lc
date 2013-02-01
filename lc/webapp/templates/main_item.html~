@@ -47,7 +47,7 @@
 		      font-size: 12px;
 		      font-weight: bold;
 		      text-shadow: 0.1em 0.1em white;">
-	    <a href="#" id="qct{{header.id}}" onclick="openQuickComment({{header.id}});return false;" class="lc-top-link">Hizlica-bi-yorum-yaz</a>
+	    <a href="#" id="qct{{header.id}}" onclick="openQuickComment({{header.id}});return false;" class="lc-top-link">hizlica-bi-yorum-yaz</a>
 	    <div id="qcd{{header.id}}" class="dp-none" style="max-width:500px; margin-top:5px;">
 	      <textarea id="qcf{{header.id}}"></textarea>
 	      <a href="#" class="secondary small button" onclick="sendQuickComment({{header.id}});return false;" style="float:right">Yolla</a>
@@ -61,5 +61,4 @@
     </div>
   </div>
 
-  <div class="two columns"></div>
-</div>
+

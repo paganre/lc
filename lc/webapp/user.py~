@@ -38,7 +38,7 @@ def vote(uid,cid,vote):
             v = int(v)
         if v == vote:
             return (True,'') # no need to change - same vote - should never be possible
-        r.hset('v:'+str(uid),vote)
+        r.hset('v:'+str(uid),str(cid),vote)
         if v == 1:
             Comment.objects.filter(id=int(cid)).update(up=F('up')-1)
         elif v == -1:
@@ -49,6 +49,7 @@ def vote(uid,cid,vote):
             Comment.objects.filter(id=int(cid)).update(down=F('down')+1)
         return (True,'')
     except:
+        connection._rollback()
         return (False,str(traceback.format_exc()))
 
 def login(request,username,password):

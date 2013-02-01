@@ -1,3 +1,23 @@
+function checkNot(){
+    $.ajax({
+            url: '/notif/',
+                type: 'GET',
+                success: function(response) {
+                response = JSON.parse(response);
+                if(response.result == 0){
+                    dispNot(response.html);
+                }else{
+		    //alert(response.e);
+                }
+
+            }
+        });
+}
+
+function dispNot(html){
+    $("#right-bar").html(html);
+}
+
 function sendQuickComment(id){
     text = $("#qcf"+id).val();
     if(text.trim() == ""){

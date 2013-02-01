@@ -36,10 +36,11 @@ def get_comment(cid):
 
 def comment_to_dict(comment):
     return {'id':comment.id,
-            'creator_name':comment.creator,
+            'creator_name':comment.creator.user.username,
+            'creator_id':comment.creator.id,
             'text':comment.text,
             'time':comment.time_created,
-            'net_vote':comment.net_vote}
+            'net_vote':comment.up-comment.down}
 
 def get_comment_fields(subthread):
     """

@@ -18,3 +18,9 @@
       </div>
   </div>
 </div>
+{% if user.is_authenticated %}
+<script>
+  checkNot();
+  setInterval(checkNot, 120000);
+</script> 
+{% endif %}

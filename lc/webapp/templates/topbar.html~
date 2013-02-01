@@ -2,7 +2,7 @@
   <div class="row lc-top-bar" style="height:44px;">
       <div class="four mobile-one columns"></div>
       <div class="four mobile-two columns lc-top-title">
-	<a href="/">Les Comments</a>
+	<a href="/" style="color:black;">Les Comments</a>
       </div>
       <div class="four mobile-one columns">
 	{% if user.is_authenticated %}
@@ -18,3 +18,8 @@
       </div>
   </div>
 </div>
+{% if user.is_authenticated %}
+<script>
+  setInterval(checkNot, 120000);
+</script> 
+{% endif %}

@@ -1,4 +1,5 @@
 from webapp.models import Thread,Domain,LcUser,Comment
+from webapp import user as u
 from django.db import connection
 from time import time
 import traceback
@@ -16,6 +17,9 @@ def add_comment(uid,tid,text,parent=None):
             parent = Comment.objects.get(pk = int(parent))
         c = Comment(id = id, creator=creator, thread = thread, parent = parent, text=text, time_created = int(time()))
         c.save()
+        if (parent != None):
+            if parent.creator.id != creator.id:
+                u.notify(parent.creator.id,c.id)
         return (True,id)
     except:
         connection._rollback()

@@ -6,7 +6,7 @@
   <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
   <script src="/static/js/home.js" type="text/javascript"></script>
 </head>
-<body style="background:rgb(245,245,245);">
+<body>
   {% include "topbar.html" %}
   {% for header in headers %}
    {% include "main_item.html" with header=header %}

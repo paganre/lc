@@ -4,6 +4,7 @@ from django.contrib import auth
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.models import User
+from webapp.models import LcUser,Comment,Thread
 from django.http import HttpResponseRedirect, HttpResponse
 from webapp import user
 from webapp.aleister import Aleister
@@ -23,6 +24,24 @@ from django.http import Http404
 # I am using both CSRF Middleware and csrf_protect() for extra security
 # More info: https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
 
+def notif(request):
+    if request.user and request.user.is_authenticated() and 'uid' in request.session:
+        try:
+            notifs = user.get_notifs(int(request.session['uid']))
+            t = get_template("notif_item.html");
+            html = ""
+            for n in notifs:
+                cid = int(n[0])
+                c = Comment.objects.get(pk = cid)
+                context = {"creator":c.creator.user.username,
+                           "tid":c.thread.id,
+                           "title":c.thread.title}
+                html += t.render(Context(context))
+            return HttpResponse(json.dumps({'result':0,'html':html}))
+        except:
+            return HttpResponse(json.dumps({'result':-1,'error':str(traceback.format_exc())}))
+    else:
+        return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
 @csrf_protect
 def vote(request):
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
