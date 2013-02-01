@@ -7,7 +7,7 @@
       <div class="four mobile-one columns">
 	{% if user.is_authenticated %}
 	<a href="/logout" class="lc-top-link" style="float:right;margin-top:20px;">Cikis</a>
-        <a href="#" class="lc-top-link" style="float:right;margin-top:20px;margin-right:10px">{{user.username}}</a>
+        <a href="/u/{{user.username}}" class="lc-top-link" style="float:right;margin-top:20px;margin-right:10px">{{user.username}}</a>
 	<a href="/submit" class="lc-top-link" style="float:right;margin-top:20px;margin-right:10px;font-weight:bolder !important;">Ekle</a>
 	{% else %}
 	<a href="#" id="login-register-button" class="lc-top-link" style="float:right;margin-top:20px;">Giris</a>

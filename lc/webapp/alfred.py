@@ -4,11 +4,7 @@ from webapp import comment as c
 import traceback
 
 def get_main():
-    """
-    returns an array of sorted thread ids - sorting logic to be added
-    """
     return [t.id for t in Thread.objects.all().order_by('-time_created')[:50]]
-
 
 def get_best_subthread(tid):
     """
@@ -30,3 +26,12 @@ def get_best_subthread(tid):
     except:
         connection._rollback()
         return (False,str(traceback.format_exc()))
+
+def subthread_sort(subtread_list):
+    try:
+        # List subtreads by their parents' up field in decreasing order
+        subtread_list.sort(key=lambda l: l.comment.up, reverse=True)
+        return True
+    except:
+        # If an object that is not a subthread list, return the object
+        return False

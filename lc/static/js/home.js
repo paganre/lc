@@ -16,7 +16,7 @@ function checkNot(){
                 if(response.result == 0){
                     dispNot(response.html);
                 }else{
-		    //alert(response.e);
+                    //alert(response.e);
                 }
 
             }
@@ -119,7 +119,7 @@ function loginWith(){
     name = $("#nickname").val();
     password = $("#password").val();
     $.ajax({
-            url: 'login/',
+            url: '/login/',
 		type: 'POST',
 		data: {'username':name,'password':password},
                 success: function(response) {
@@ -148,7 +148,7 @@ function register(){
     password = $("#rpassword").val();
     email = $("#remail").val();
     $.ajax({
-            url: 'register/',
+            url: '/register/',
                 type: 'POST',
                 data: {'username':name,'password':password,'email':email},
                 success: function(response) {

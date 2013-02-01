@@ -14,6 +14,7 @@ urlpatterns = patterns('',
     url(r'^vote/$','webapp.views.vote'),
     url(r'^notif/$','webapp.views.notif'),               
     url(r'^remnot/$','webapp.views.rem_notif'),
+    url(r'^u/(?P<username>\w+)','webapp.views.userpage'),
 )
 
 
