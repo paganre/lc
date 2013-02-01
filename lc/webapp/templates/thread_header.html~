@@ -24,7 +24,7 @@
 		      text-shadow: 0.1em 0.1em white;">
 	    <div id="qcd{{header.id}}" style="max-width:500px; margin-top:5px;">
 	      <textarea id="qcf{{header.id}}"></textarea>
-	      <a href="#" class="secondary small button" onclick="sendQuickComment({{header.id}});return false;" style="float:right">Yolla</a>
+	      <a href="#" class="secondary small button" onclick="sendComment({{header.id}});return false;" style="float:right">Yolla</a>
 	      <span id="qclabel{{header.id}}" class="secondary label dp-none"></span>
 	    </div>
 	  </div>

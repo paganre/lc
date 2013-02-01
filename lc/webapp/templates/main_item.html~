@@ -11,7 +11,7 @@
 		      text-shadow: 0.1em 0.1em white;
 		      ">
 	    (<a href="/t/{{header.id}}" style="font-weight: bold;" class="lc-top-link"> {{header.num_comment}} yorum</a>, {{header.time}} once 
-	    <a href="#" style="font-weight: bold;" class="lc-top-link">{{header.creator_name}} </a> yaratti){% if uid == header.creator_id %}{% include "inline_tag.html" %} {% endif %}
+	    <a href="#" style="font-weight: bold;" class="lc-top-link">{{header.creator_name}} </a> yaratti{% for tag in header.tags %} , <a href="/tag/{{tag.0}}" style="font-weight: bold;" class="lc-top-link">#{{tag.1}}</a>{% endfor %}){% if uid == header.creator_id %}{% include "inline_tag.html" %} {% endif %}
 	  </div>
 
 	  {% if header.comments and header.comments|length > 0 %}

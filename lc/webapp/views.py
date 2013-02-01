@@ -119,8 +119,10 @@ def thread(request,tid):
             # adjust </div> ranges
             comments = []
             votes = [0] * len(th[3])
+            uid = -1
             if 'uid' in request.session:
-                res = user.did_vote(int(request.session['uid']),th[3])
+                uid = int(request.session['uid'])
+                res = user.did_vote(uid,th[3])
                 if res[0]:
                     votes = res[1]
                     
@@ -149,7 +151,7 @@ def thread(request,tid):
                 highlight = int(n)
                 
             t.increment_view_count(int(tid))
-            return render_to_response('thread.html',{"user": request.user,"header":th[1],"threads":comments,"tid":tid,"highlight":highlight},context_instance=RequestContext(request))
+            return render_to_response('thread.html',{"user": request.user,"uid":uid,"header":th[1],"threads":comments,"tid":tid,"highlight":highlight},context_instance=RequestContext(request))
         else:
             return HttpResponse(th[1])
     except:

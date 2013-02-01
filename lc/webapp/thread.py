@@ -51,6 +51,7 @@ def get_full_thread(tid):
                       'net_vote':t.up-t.down,
                       'time':t.time_created,
                       'num_comment':len(Comment.objects.filter(thread = t)),
+                      'tags':tagger.get_tags(int(tid))
                       },comments,ids)
     except:
         connection._rollback()
