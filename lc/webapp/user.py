@@ -136,7 +136,18 @@ def get_commented_threads(uid):
         user_threads = []
         for c in user_comments:
             tid = c.thread.id
-            user_threads = user_threads + [tid]
+            user_threads = user_threads + [[tid,[c.id]]]
+        # Eliminate duplicates from the thread ids
+        # Merge comment IDs during the elimination 
+        if user_threads:
+            user_threads.sort(key=lambda l: l[0])
+            last = user_threads[-1]
+            for i in range(len(user_threads)-2, -1, -1):
+                if last[0] == user_threads[i][0]:
+                    last[1] = last[1] + user_threads[i][1]
+                    del user_threads[i]
+                else:
+                    last = user_threads[i]
         return (True, user_threads)
     except:
-        return (False,str(traceback.format_exc()))
+        return (False,str(traceback.format_exc()),'')

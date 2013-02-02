@@ -1,6 +1,7 @@
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.middleware.csrf import get_token
 from django.contrib import auth
+from django.db import connection
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.models import User
@@ -162,12 +163,19 @@ def userpage(request,username):
     if request.user.username==username and request.user.is_authenticated() and 'uid' in request.session:
         res = u.get_commented_threads(int(request.session['uid']))
         if res[0]:
-            tids = res[1]
-            headers = [t.get_thread_header(tid) for tid in tids]
-            headers = [h[1] for h in headers if h[0]]
-            for h in headers:
-                h['comments']=[]
-                return render_to_response('userpage.html',{"user": request.user,"headers":headers},context_instance=RequestContext(request))
+            headers = []
+            for r in res[1]:
+                header = t.get_thread_header(r[0])
+                if header[0]:
+                    sub = []
+                    for cid in r[1]:
+                        try:
+                            sub.append(Comment.objects.get(pk = int(cid)))
+                        except:
+                            connection._rollback()
+                        header[1]['comments'] = c.get_comment_fields(sub)
+                    headers = headers + [header[1]]
+            return render_to_response('userpage.html',{"user": request.user,"headers":headers},context_instance=RequestContext(request))
         else:
             return HttpResponse(res[1])
     else:
@@ -233,10 +241,10 @@ def scribe(request):
 @csrf_protect
 def home(request):
     s = request.GET.get('s','')
-    if s == 'n':
-        tids = alfred.get_time_ordered()
-    else:
+    if s == 'a':
         tids = alfred.get_best()
+    else:
+        tids = alfred.get_time_ordered()
     headers = [t.get_thread_header(tid) for tid in tids]
     headers = [h[1] for h in headers if h[0]]
     for h in headers:
