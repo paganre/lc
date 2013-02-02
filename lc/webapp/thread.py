@@ -35,7 +35,7 @@ def get_full_thread(tid):
                     if(s.insertChildTo(c.parent.id,Subthread(c,[]))):
                         break
 
-        if not alfred.subthread_sort(subs):
+        if not alfred.subthread_list_sort(subs):
             return (False,str(traceback.format_exc()))
         # convert trees to traversed lists
         comments = []
