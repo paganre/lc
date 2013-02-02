@@ -8,6 +8,12 @@ import os
 import redis
 from django.db.models import F
 
+def get_user_id(username):
+    try:
+        return LcUser.objects.filter(user__username = username)[0].id
+    else:
+        return -1
+
 def notify(uid,cid):
     """
     notify user about a reply to his-her comment from another user
@@ -64,14 +70,26 @@ def vote(uid,cid,vote):
         if v == vote:
             return (True,'') # no need to change - same vote - should never be possible
         r.hset('v:'+str(uid),str(cid),vote)
+        
+        c = Comment.objects.get(pk = int(cid))
+        t = c.thread
+
         if v == 1:
-            Comment.objects.filter(id=int(cid)).update(up=F('up')-1)
+            c.up = c.up - 1
+            t.up = t.up - 1
         elif v == -1:
-            Comment.objects.filter(id=int(cid)).update(down=F('down')-1)
+            c.down = c.down - 1
+            t.down = t.down - 1
         if vote == 1:
-            Comment.objects.filter(id=int(cid)).update(up=F('up')+1)
+            c.up = c.up + 1
+            t.up = t.up + 1
         elif vote == -1:
-            Comment.objects.filter(id=int(cid)).update(down=F('down')+1)
+            c.down = c.down +1
+            t.down = t.down +1
+
+        c.save()
+        t.save()
+
         return (True,'')
     except:
         connection._rollback()
@@ -116,3 +134,26 @@ def logout(request):
         return (True,'')
     except:
         return (False,str(traceback.format_exc()))
+
+def get_commented_threads(uid):
+    try:
+        creator = LcUser.objects.get(pk = int(uid))
+        user_comments = creator.comment_set.all()
+        user_threads = []
+        for c in user_comments:
+            tid = c.thread.id
+            user_threads = user_threads + [[tid,[c.id]]]
+        # Eliminate duplicates from the thread ids
+        # Merge comment IDs during the elimination 
+        if user_threads:
+            user_threads.sort(key=lambda l: l[0])
+            last = user_threads[-1]
+            for i in range(len(user_threads)-2, -1, -1):
+                if last[0] == user_threads[i][0]:
+                    last[1] = last[1] + user_threads[i][1]
+                    del user_threads[i]
+                else:
+                    last = user_threads[i]
+        return (True, user_threads)
+    except:
+        return (False,str(traceback.format_exc()),'')

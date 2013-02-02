@@ -21,6 +21,7 @@ from django.template.loader import get_template
 from django.template import Context
 from webapp import alfred
 from django.http import Http404
+from webapp.pretty_time import pretty_time
 
 # Common site request forgery protection risk
 # Request is obtained from the login.html via POST

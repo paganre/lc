@@ -11,7 +11,7 @@
 		      text-shadow: 0.1em 0.1em white;
 		      ">
 	    (<a href="/t/{{header.id}}" style="font-weight: bold;" class="lc-top-link"> {{header.num_comment}} yorum</a>, {{header.time}} once 
-	    <a href="/u/{{header.creator_name}}" style="font-weight: bold;" class="lc-top-link">{{header.creator_name}} </a> yaratti{% for tag in header.tags %} , <a href="/tag/{{tag.0}}" style="font-weight: bold;" class="lc-top-link">#{{tag.1}}</a>{% endfor %}){% if uid == header.creator_id %}{% include "inline_tag.html" %} {% endif %}
+	    <a href="#" style="font-weight: bold;" class="lc-top-link">{{header.creator_name}} </a> yaratti{% for tag in header.tags %} , <a href="/tag/{{tag.0}}" style="font-weight: bold;" class="lc-top-link">#{{tag.1}}</a>{% endfor %}){% if uid == header.creator_id %}{% include "inline_tag.html" %} {% endif %}
 	  </div>
 
 	  {% if header.comments and header.comments|length > 0 %}
@@ -25,7 +25,7 @@
 	    {% else %}
 	    <div style="margin-left:15px;padding:5px 5px;">
 	    {% endif %}
-	      <div style="padding:3px 3px; font-size:12px !important">[{{c.net_vote}}] <a href="/u/{{c.creator_name}}" class="lc-top-link"><strong>{{c.creator_name}}</strong></a> {{c.time}} once</div>
+	      <div style="padding:3px 3px; font-size:12px !important">[{{c.net_vote}}] <a href="#" class="lc-top-link"><strong>{{c.creator_name}}</strong></a> {{c.time}} once</div>
 	      <div style="padding:3px 3px; font-size:12px !important">{{c.text}}</div>
 	      {% if forloop.counter == header.comments|length %}
      	      <div id="cmore{{header.id}}" style="margin-top:5px;">

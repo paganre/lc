@@ -163,24 +163,22 @@ def thread(request,tid):
 
 @csrf_protect
 def userpage(request,username):
-    if request.user.username==username and request.user.is_authenticated() and 'uid' in request.session:
-        res = u.get_commented_threads(int(request.session['uid']))
-        if res[0]:
-            headers = []
-            for r in res[1]:
-                header = t.get_thread_header(r[0])
-                if header[0]:
-                    sub = []
-                    for cid in r[1]:
-                        try:
-                            sub.append(Comment.objects.get(pk = int(cid)))
-                        except:
-                            connection._rollback()
-                        header[1]['comments'] = c.get_comment_fields(sub)
-                    headers = headers + [header[1]]
-            return render_to_response('userpage.html',{"user": request.user,"headers":headers},context_instance=RequestContext(request))
-        else:
-            return HttpResponse(res[1])
+    #if request.user.username==username and request.user.is_authenticated() and 'uid' in request.session:
+    res = u.get_commented_threads(u.get_user_id(username))
+    if res[0]:
+        headers = []
+        for r in res[1]:
+            header = t.get_thread_header(r[0])
+            if header[0]:
+                sub = []
+                for cid in r[1]:
+                    try:
+                        sub.append(Comment.objects.get(pk = int(cid)))
+                    except:
+                        connection._rollback()
+                    header[1]['comments'] = c.get_comment_fields(sub)
+                headers = headers + [header[1]]
+        return render_to_response('userpage.html',{"username":username,"user": request.user,"headers":headers},context_instance=RequestContext(request))
     else:
         return HttpResponseRedirect("/")
 

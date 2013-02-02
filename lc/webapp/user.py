@@ -8,6 +8,12 @@ import os
 import redis
 from django.db.models import F
 
+def get_user_id(username):
+    try:
+        return LcUser.objects.filter(user__username = username)[0].id
+    except:
+        return -1
+
 def notify(uid,cid):
     """
     notify user about a reply to his-her comment from another user
