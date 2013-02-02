@@ -33,7 +33,7 @@ class Comment(models.Model):
     id = models.IntegerField(primary_key = True)
     creator = models.ForeignKey('LcUser', verbose_name="creator")
     thread = models.ForeignKey('Thread',verbose_name="thread")
-    parent = models.ForeignKey('Comment',verbose_name="parent comment",default=None)
+    parent = models.ForeignKey('Comment',verbose_name="parent comment",blank=True,null=True,default=None)
     text = models.CharField(max_length = 10000)
     time_created = models.IntegerField()
     up = models.IntegerField(default=0)

@@ -1,6 +1,6 @@
     <div class="twelve columns" style="margin-top: 5px; margin-bottom: 5px;">
       <div class="row" style="min-width: 0px;">
-	<div class="twelve columns">
+	<div class="twelve columns" style="margin-bottom:10px">
 	  <div style="font-size: 17px;">
 	    <a href="{{header.url}}" target="_newtab" class="lc-top-link" style="text-decoration:underline; color:royalblue;">{{header.title}}</a>
 	    <a href="#" style="font-weight: normal;font-size: 14px;" class="lc-top-link">[{{header.domain}}]</a>
@@ -10,12 +10,20 @@
 		      font-size: 12px;
 		      text-shadow: 0.1em 0.1em white;
 		      ">
-	    (<a href="/t/{{header.id}}" style="font-weight: bold;" class="lc-top-link"> {{header.num_comment}} yorum</a>, {{header.time}} once 
+	    (<a href="/t/{{header.id}}" style="font-weight: bold;" class="lc-top-link"> {{header.num_comment}} yorum</a>, {{header.time}} 
 	    <a href="#" style="font-weight: bold;" class="lc-top-link">{{header.creator_name}} </a> yaratti{% for tag in header.tags %} , <a href="/tag/{{tag.0}}" style="font-weight: bold;" class="lc-top-link">#{{tag.1}}</a>{% endfor %}){% if uid == header.creator_id %}{% include "inline_tag.html" %} {% endif %}
 	  </div>
 
+	  {% if header.summary %}
+	  {% include "generic/summary.html" with header=header %}
+	  {% endif %}
+
 	  {% if header.comments and header.comments|length > 0 %}
+	  {% if header.summary %}
+	  <div class="panel" id="cp{{header.id}}"  style="padding:10px !important; margin-bottom:0px !important; padding-bottom:20px !important; max-width:500px; font-size:12px !important;">
+	  {% else %}
 	  <div class="panel" id="cp{{header.id}}"  style="padding:10px !important; margin-bottom:0px !important; padding-bottom:20px !important; margin-top:10px; max-width:500px; font-size:12px !important;">
+	  {% endif %}
 	    <a href="#" onclick="toggleComment({{header.id}});return false;" class="toggle-comment-panel" id="tcp{{header.id}}" style="color: black;">
 	      <i id="tci{{header.id}}" class="general foundicon-minus" style="float: left; font-size:9px;"></i>
 	    </a>
@@ -25,11 +33,11 @@
 	    {% else %}
 	    <div style="margin-left:15px;padding:5px 5px;">
 	    {% endif %}
-	      <div style="padding:3px 3px; font-size:12px !important">[{{c.net_vote}}] <a href="#" class="lc-top-link"><strong>{{c.creator_name}}</strong></a> {{c.time}} once</div>
+	      <div style="padding:3px 3px; font-size:12px !important">[{{c.net_vote}}] <a href="#" class="lc-top-link"><strong>{{c.creator_name}}</strong></a> {{c.time}} </div>
 	      <div style="padding:3px 3px; font-size:12px !important">{{c.text}}</div>
 	      {% if forloop.counter == header.comments|length %}
      	      <div id="cmore{{header.id}}" style="margin-top:5px;">
-                <a href="/t/{{header.id}}" style="float: right; color:royalblue;" class="lc-top-link">[tamamini goster]</a>
+                <a href="/t/{{header.id}}" style="float: right; color:royalblue; text-decoration:underline; font-size:13px;" class="lc-top-link">[tamamini goreyim]</a>
               </div>
 	      {% endif %}
 	    {% endfor %}

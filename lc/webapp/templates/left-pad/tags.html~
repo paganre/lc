@@ -2,7 +2,7 @@
   <div>[ les etiket ]</div>
   {% for tag in tags %}
   <div style="margin-top: 8px; margin-left: 10px;">
-    <a href="/tag/{{tag.0}}" class="lc-top-link" style="color: royalblue !important; text-decoration: underline; font-size:13px;">#{{tag.1}} [{{tag.2}}]</a>
+    <a href="/tag/{{tag.0}}" class="lc-top-link" style="color: royalblue !important; text-decoration: underline;">#{{tag.1}} [{{tag.2}}]</a>
   </div>
   {% endfor %}
 </div>

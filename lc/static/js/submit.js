@@ -25,10 +25,14 @@ function submitLink(){
 
 function createThread(){
     title = $("#title-field").val();
+    summary = $("#summary-field").val();
+    if(summary.length > 250){
+	summary = summary.substring(0,247)+"...";
+    }
     $.ajax({
             url: '/create/',
                 type: 'POST',
-                data: {'link':selected_link,'title':title,'suggested':suggested_title,'domain':domain},
+                data: {'link':selected_link,'summary':summary,'title':title,'suggested':suggested_title,'domain':domain},
                 success: function(response) {
                 response = JSON.parse(response);
                 if(response.result == 0){

@@ -2,6 +2,7 @@ from webapp.models import Thread,Domain,LcUser,Comment
 from webapp import user as u
 from django.db import connection
 from time import time
+from webapp.pretty_time import pretty_time
 import traceback
 import os
 
@@ -31,7 +32,7 @@ def get_comment(cid):
         return (True,{'id':comment.id,
                       'creator_name':comment.creator.user.username,
                       'creator_id':comment.creator.id,
-                      'time':comment.time_created,
+                      'time':pretty_time(int(comment.time_created)),
                       'text':comment.text,
                       'net_vote':comment.up-comment.down})
     except:
@@ -43,7 +44,7 @@ def comment_to_dict(comment):
             'creator_name':comment.creator.user.username,
             'creator_id':comment.creator.id,
             'text':comment.text,
-            'time':comment.time_created,
+            'time':pretty_time(int(comment.time_created)),
             'net_vote':comment.up-comment.down}
 
 def get_comment_fields(subthread):
@@ -55,7 +56,7 @@ def get_comment_fields(subthread):
         out.append({'id':comment.id,
                     'creator_name':comment.creator.user.username,
                     'creator_id':comment.creator.id,
-                    'time':comment.time_created,
+                    'time':pretty_time(int(comment.time_created)),
                     'text':comment.text,
                     'net_vote':comment.up-comment.down})
     return out

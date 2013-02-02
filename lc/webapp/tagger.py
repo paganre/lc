@@ -1,11 +1,22 @@
 from webapp.models import Thread,Tag,LcUser
 from django.db import connection
+from django.db.models import Count
 import traceback
 import os
 from time import time
 
 def generateId():
     return int(os.urandom(4).encode('hex'),16) / 2
+
+def get_top_tags(N):
+    """
+    return top N tag info [ (tag_id,tag_name,tag_thread_count) ]
+    """
+    try:
+        tags = Tag.objects.all().annotate(num_threads = Count("threads")).order_by('-num_threads')[:N]
+        return [(t.id,t.name,t.num_threads) for t in tags]
+    except:
+        return []
 
 def get_tags(tid):
     """

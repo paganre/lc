@@ -21,6 +21,7 @@ from django.template.loader import get_template
 from django.template import Context
 from webapp import alfred
 from django.http import Http404
+from webapp.pretty_time import pretty_time
 
 # Common site request forgery protection risk
 # Request is obtained from the login.html via POST
@@ -32,13 +33,15 @@ def get_tag(request,tagid):
     tids = tagger.get_threads(tagid)
     headers = [t.get_thread_header(tid) for tid in tids]
     headers = [h[1] for h in headers if h[0]]
+    
     for h in headers:
         res = alfred.get_best_subthread(h['id'])
         if(res[0]):
             h['comments'] = res[1]
         else:
             h['comments'] = []
-    tags = []
+    
+    tags = tagger.get_top_tags(5)
     uid = -1
     if 'uid' in request.session:
         uid = int(request.session['uid'])
@@ -255,8 +258,9 @@ def home(request):
             h['comments'] = res[1]
         else:
             h['comments'] = []
-    # TODO: need to get treding tags here also
-    tags = []
+    
+    tags = tagger.get_top_tags(5)
+    
     uid = -1
     if 'uid' in request.session:
         uid = int(request.session['uid'])
@@ -306,6 +310,9 @@ def create(request):
     if request.user and request.user.is_authenticated():
         link = request.POST.get('link','')
         title = request.POST.get('title','')
+        summary = request.POST.get('summary','')
+        if summary == '':
+            summary = None
         suggested = request.POST.get('suggested','')
         domain_name = request.POST.get('domain','')
         domain_name = domain_name[1:len(domain_name)-1] # strip parantheses
@@ -315,12 +322,12 @@ def create(request):
         if(res[0]):
             domain = res[0]
         else:
-                return HttpResponse(json.dumps({'result':-1,'error':res[1]}))
+            return HttpResponse(json.dumps({'result':-1,'error':res[1]}))
         # check if a thread with same domain and suggested title already exists
         ds_res = t.check_domain_stitle(suggested, domain)
         if(ds_res[0]==0):
             # create thread
-            res = t.create_thread(int(request.session['uid']),title,suggested,domain,link)
+            res = t.create_thread(int(request.session['uid']),title,summary,suggested,domain,link)
             if(res[0]):
                 return HttpResponse(json.dumps({'result':0,'tid':str(res[1])}))
             else:

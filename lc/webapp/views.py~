@@ -1,6 +1,7 @@
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.middleware.csrf import get_token
 from django.contrib import auth
+from django.db import connection
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.models import User
@@ -31,13 +32,15 @@ def get_tag(request,tagid):
     tids = tagger.get_threads(tagid)
     headers = [t.get_thread_header(tid) for tid in tids]
     headers = [h[1] for h in headers if h[0]]
+    
     for h in headers:
         res = alfred.get_best_subthread(h['id'])
         if(res[0]):
             h['comments'] = res[1]
         else:
             h['comments'] = []
-    tags = []
+    
+    tags = tagger.get_top_tags(5)
     uid = -1
     if 'uid' in request.session:
         uid = int(request.session['uid'])
@@ -119,8 +122,10 @@ def thread(request,tid):
             # adjust </div> ranges
             comments = []
             votes = [0] * len(th[3])
+            uid = -1
             if 'uid' in request.session:
-                res = user.did_vote(int(request.session['uid']),th[3])
+                uid = int(request.session['uid'])
+                res = user.did_vote(uid,th[3])
                 if res[0]:
                     votes = res[1]
                     
@@ -149,7 +154,7 @@ def thread(request,tid):
                 highlight = int(n)
                 
             t.increment_view_count(int(tid))
-            return render_to_response('thread.html',{"user": request.user,"header":th[1],"threads":comments,"tid":tid,"highlight":highlight},context_instance=RequestContext(request))
+            return render_to_response('thread.html',{"user": request.user,"uid":uid,"header":th[1],"threads":comments,"tid":tid,"highlight":highlight},context_instance=RequestContext(request))
         else:
             return HttpResponse(th[1])
     except:
@@ -160,12 +165,19 @@ def userpage(request,username):
     if request.user.username==username and request.user.is_authenticated() and 'uid' in request.session:
         res = u.get_commented_threads(int(request.session['uid']))
         if res[0]:
-            tids = res[1]
-            headers = [t.get_thread_header(tid) for tid in tids]
-            headers = [h[1] for h in headers if h[0]]
-            for h in headers:
-                h['comments']=[]
-                return render_to_response('userpage.html',{"user": request.user,"headers":headers},context_instance=RequestContext(request))
+            headers = []
+            for r in res[1]:
+                header = t.get_thread_header(r[0])
+                if header[0]:
+                    sub = []
+                    for cid in r[1]:
+                        try:
+                            sub.append(Comment.objects.get(pk = int(cid)))
+                        except:
+                            connection._rollback()
+                        header[1]['comments'] = c.get_comment_fields(sub)
+                    headers = headers + [header[1]]
+            return render_to_response('userpage.html',{"user": request.user,"headers":headers},context_instance=RequestContext(request))
         else:
             return HttpResponse(res[1])
     else:
@@ -230,7 +242,13 @@ def scribe(request):
 
 @csrf_protect
 def home(request):
-    tids = alfred.get_main()
+    s = request.GET.get('s','')
+    if s == 'a':
+        algorithm_works = True
+        tids = alfred.get_best()
+    else:
+        algorithm_works = False
+        tids = alfred.get_time_ordered()
     headers = [t.get_thread_header(tid) for tid in tids]
     headers = [h[1] for h in headers if h[0]]
     for h in headers:
@@ -239,12 +257,13 @@ def home(request):
             h['comments'] = res[1]
         else:
             h['comments'] = []
-    # TODO: need to get treding tags here also
-    tags = []
+    
+    tags = tagger.get_top_tags(5)
+    
     uid = -1
     if 'uid' in request.session:
         uid = int(request.session['uid'])
-    return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":tags},context_instance=RequestContext(request))
+    return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":tags,"algorithm_works":algorithm_works},context_instance=RequestContext(request))
 
 @csrf_protect
 def submit(request):
@@ -290,6 +309,9 @@ def create(request):
     if request.user and request.user.is_authenticated():
         link = request.POST.get('link','')
         title = request.POST.get('title','')
+        summary = request.POST.get('summary','')
+        if summary == '':
+            summary = None
         suggested = request.POST.get('suggested','')
         domain_name = request.POST.get('domain','')
         domain_name = domain_name[1:len(domain_name)-1] # strip parantheses
@@ -299,12 +321,12 @@ def create(request):
         if(res[0]):
             domain = res[0]
         else:
-                return HttpResponse(json.dumps({'result':-1,'error':res[1]}))
+            return HttpResponse(json.dumps({'result':-1,'error':res[1]}))
         # check if a thread with same domain and suggested title already exists
         ds_res = t.check_domain_stitle(suggested, domain)
         if(ds_res[0]==0):
             # create thread
-            res = t.create_thread(int(request.session['uid']),title,suggested,domain,link)
+            res = t.create_thread(int(request.session['uid']),title,summary,suggested,domain,link)
             if(res[0]):
                 return HttpResponse(json.dumps({'result':0,'tid':str(res[1])}))
             else:

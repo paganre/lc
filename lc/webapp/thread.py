@@ -8,6 +8,7 @@ import os
 from django.db.models import F
 from webapp import alfred
 from webapp import tagger
+from webapp.pretty_time import pretty_time
 
 def generateId():
     return int(os.urandom(4).encode('hex'),16) / 2
@@ -45,11 +46,12 @@ def get_full_thread(tid):
         return (True,{'id':t.id,
                       'url':t.url,
                       'title':t.title,
+                      'summary':t.summary,
                       'domain':t.domain.name,
                       'creator_name':t.creator.user.username,
                       'creator_id':t.creator.id,
                       'net_vote':t.up-t.down,
-                      'time':t.time_created,
+                      'time':pretty_time(int(t.time_created)),
                       'num_comment':len(Comment.objects.filter(thread = t)),
                       'tags':tagger.get_tags(int(tid))
                       },comments,ids)
@@ -63,18 +65,19 @@ def get_thread_header(tid):
         return (True,{'id':t.id,
                       'url':t.url,
                       'title':t.title,
+                      'summary':t.summary,
                       'domain':t.domain.name,
                       'creator_name':t.creator.user.username,
                       'creator_id':t.creator.id,
                       'net_vote':t.up-t.down,
-                      'time':t.time_created,
+                      'time':pretty_time(int(t.time_created)),
                       'tags':tagger.get_tags(int(tid)),
                       'num_comment':len(Comment.objects.filter(thread = t))})
     except:
         connection._rollback()
         return (False,str(traceback.format_exc()))
 
-def create_thread(creator_id, title, suggested_title, domain, url):
+def create_thread(creator_id, title,summary, suggested_title, domain, url):
     try:
         # retrieve LcUser
         creator = LcUser.objects.get(pk = creator_id)
@@ -82,6 +85,7 @@ def create_thread(creator_id, title, suggested_title, domain, url):
         t = Thread(id=tid,
                    creator=creator,
                    title=title,
+                   summary=summary,
                    suggested_title=suggested_title,
                    url = url,
                    domain = domain,

@@ -5,8 +5,17 @@
   </a>
   <div id="cpd{{tid}}" style="margin-left:15px;padding:5px 5px;">
 {% else %}
+
+
+{% if page == "thread" and new == 1 %}
+<div class="twelve columns">
+{% include "open_panel.html" %}
+{% endif %}
+
   <div id="com{{c.id}}" style="margin-left:15px;padding:5px 5px;">
 {% endif %}
+
+
   {% if page == "thread" %}
    <div style="padding:3px 3px; font-size:12px !important">[{{c.net_vote}}] <a href="#" class="lc-top-link" style="color:royalblue !important;"><strong>{{c.creator_name}}</strong></a> {{c.time}} ago</div>
    <div style="padding:3px 3px; font-size:12px !important; color:royalblue !important;">{{c.text}}</div>
@@ -26,6 +35,14 @@
   {% endif %}
 
   </div>
+
+
+{% if page == "thread" and new == 1 %}
+</div>
+</div>
+{% endif %}
+
+
 {% if page == "home" and has_panel == 0 %}
 </div>
 {% endif %}

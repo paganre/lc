@@ -1,0 +1,5 @@
+{% if header.comments|length > 0 %}
+<div class="panel" id="sum{{header.id}}" style="padding:10px !important; margin-bottom:0px !important;  margin-top:10px; max-width:500px; font-size:12px !important;background: #EFEFFB;border-bottom: 0px;">{{header.summary}}</div>
+{% else %}
+<div class="panel" id="sum{{header.id}}" style="padding:10px !important; margin-bottom:0px !important;  margin-top:10px; max-width:500px; font-size:12px !important;background: #EFEFFB;">{{header.summary}}</div>
+{% endif %}

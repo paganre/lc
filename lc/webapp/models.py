@@ -28,6 +28,7 @@ class Thread(models.Model):
     shares = models.IntegerField(default=0)
     views = models.IntegerField(default=0)
     share_views = models.IntegerField(default=0)
+    summary = models.CharField(max_length = 250, blank=True,null=True,default=None)
 
 class Comment(models.Model):
     id = models.IntegerField(primary_key = True)

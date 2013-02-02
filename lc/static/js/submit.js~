@@ -32,7 +32,7 @@ function createThread(){
                 success: function(response) {
                 response = JSON.parse(response);
                 if(response.result == 0){
-		    alert("Thread created with id: "+response.tid);
+		    window.location = '/t/'+response.tid;
                 }else{
                     alert(response.error);
                 }
