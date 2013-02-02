@@ -242,8 +242,10 @@ def scribe(request):
 def home(request):
     s = request.GET.get('s','')
     if s == 'a':
+        algorithm_works = True
         tids = alfred.get_best()
     else:
+        algorithm_works = False
         tids = alfred.get_time_ordered()
     headers = [t.get_thread_header(tid) for tid in tids]
     headers = [h[1] for h in headers if h[0]]
@@ -258,7 +260,7 @@ def home(request):
     uid = -1
     if 'uid' in request.session:
         uid = int(request.session['uid'])
-    return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":tags},context_instance=RequestContext(request))
+    return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":tags,"algorithm_works":algorithm_works},context_instance=RequestContext(request))
 
 @csrf_protect
 def submit(request):
