@@ -10,7 +10,7 @@
 					text-decoration: underline;
                                         font-size: 12px; 
                                         color: royalblue;" onclick="toggleComment({{c.id}});return false;" class="comment-toggler">[kapa]</a>
- <div style="padding:3px 3px; font-size:12px !important"><div id="comvote{{c.id}}" style="font-size:12px; margin-right:2px; float:left;">[{{c.net_vote}}]</div><a href="#" id="comuser{{c.id}}" class="lc-top-link"> <strong>{{c.creator_name}}</strong></a> {{c.time}} </div>
+ <div style="padding:3px 3px; font-size:12px !important"><div id="comvote{{c.id}}" style="font-size:12px; margin-right:2px; float:left;">[{{c.net_vote}}]</div><a href="#" id="comuser{{c.id}}" class="lc-top-link"> <strong>{{c.creator_name}}</strong></a> <l style="font-weight:lighter;">{{c.time}}</l> </div>
  <div id="comtext{{c.id}}" style="padding:3px 3px; font-size:12px !important">{{c.text}}</div>
  <div style="padding:3px 3px; font-size:12px !important">
    <a href="#" id="rpl{{c.id}}" onclick="toggleReply({{c.id}});return false;" style="font-weight:bold !important;" class="lc-top-link">cevap-yaz</a>

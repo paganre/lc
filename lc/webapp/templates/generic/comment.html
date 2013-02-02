@@ -17,10 +17,10 @@
 
 
   {% if page == "thread" %}
-   <div style="padding:3px 3px; font-size:12px !important">[{{c.net_vote}}] <a href="#" class="lc-top-link" style="color:royalblue !important;"><strong>{{c.creator_name}}</strong></a> {{c.time}} </div>
+   <div style="padding:3px 3px; font-size:12px !important">[{{c.net_vote}}] <a href="#" class="lc-top-link" style="color:royalblue !important;"><strong>{{c.creator_name}}</strong></a> <l style="font-weight:lighter;">{{c.time}}</l> </div>
    <div style="padding:3px 3px; font-size:12px !important; color:royalblue !important;">{{c.text}}</div>
   {% else %}
-   <div style="padding:3px 3px; font-size:12px !important">[{{c.net_vote}}] <a href="#" class="lc-top-link"><strong>{{c.creator_name}}</strong></a> {{c.time}} </div>
+   <div style="padding:3px 3px; font-size:12px !important">[{{c.net_vote}}] <a href="#" class="lc-top-link"><strong>{{c.creator_name}}</strong></a> <l style="font-weight:lighter;">{{c.time}}</l> </div>
    <div style="padding:3px 3px; font-size:12px !important">{{c.text}}</div>
   {% endif %}
   {% if page == "thread" %}
