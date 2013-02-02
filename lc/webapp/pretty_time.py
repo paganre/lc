@@ -4,8 +4,10 @@ def pretty_time(tm):
     current = int(time())
     sec = (current-tm);
 
-    if(sec < 10):
-        return "bikac sn once"
+    if(sec < 5):
+        return "simdik";
+    elif(sec < 10):
+        return "bikac sn once";
     elif(sec < 60):
         return "azicik once";
 

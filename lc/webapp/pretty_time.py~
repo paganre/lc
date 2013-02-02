@@ -5,17 +5,17 @@ def pretty_time(tm):
     sec = (current-tm);
 
     if(sec < 10):
-        return "bikac saniye once";
+        return "bikac sn once"
     elif(sec < 60):
         return "azicik once";
 
     min = sec / 60;
     if(int(round(min)) == 1):
-        return "bi dakika once";
+        return "bi dk once";
     elif(min < 5):
-        return "bikac dakika once";
+        return "bikac dk once";
     elif(min < 60):
-        return str(int(round(min))) + " dakika once";
+        return str(int(round(min))) + " dk once";
 
     hour = min / 60;
     if(int(round(hour)) == 1):
