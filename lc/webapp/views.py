@@ -232,7 +232,11 @@ def scribe(request):
 
 @csrf_protect
 def home(request):
-    tids = alfred.get_best()
+    s = request.GET.get('s','')
+    if s == 'n':
+        tids = alfred.get_time_ordered()
+    else:
+        tids = alfred.get_best()
     headers = [t.get_thread_header(tid) for tid in tids]
     headers = [h[1] for h in headers if h[0]]
     for h in headers:

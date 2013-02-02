@@ -4,7 +4,7 @@ from webapp import comment as c
 import traceback
 from math import sqrt
 
-def get_time():
+def get_time_ordered():
     return [t.id for t in Thread.objects.all().order_by('-time_created')[:50]]
 
 def get_best_subthread(tid):
