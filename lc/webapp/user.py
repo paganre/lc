@@ -119,22 +119,24 @@ def vote(uid,cid,vote):
         
         c = Comment.objects.get(pk = int(cid))
         t = c.thread
+    
+        if c.creator.id != int(uid):
 
-        if v == 1:
-            c.up = c.up - 1
-            t.up = t.up - 1
-        elif v == -1:
-            c.down = c.down - 1
-            t.down = t.down - 1
-        if vote == 1:
-            c.up = c.up + 1
-            t.up = t.up + 1
-        elif vote == -1:
-            c.down = c.down +1
-            t.down = t.down +1
+            if v == 1:
+                c.up = c.up - 1
+                t.up = t.up - 1
+            elif v == -1:
+                c.down = c.down - 1
+                t.down = t.down - 1
+            if vote == 1:
+                c.up = c.up + 1
+                t.up = t.up + 1
+            elif vote == -1:
+                c.down = c.down +1
+                t.down = t.down +1
 
-        c.save()
-        t.save()
+            c.save()
+            t.save()
 
         return (True,'')
     except:

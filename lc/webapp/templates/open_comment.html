@@ -1,10 +1,12 @@
 <div id="com{{c.id}}" class="comment-wrap" style="margin-left:15px;padding:5px 5px;">
+{% ifnotequal c.creator_id uid %}
  <a href="#" onclick="upvote({{c.id}});return false;" style="float: left;color: gray;">
    <i id="up{{c.id}}" class="{{c.up}} general foundicon-up-arrow" style=""></i>
  </a>
  <a href="#" onclick="downvote({{c.id}});return false;" style="float: left;color: gray; margin-right:5px;">
    <i id="down{{c.id}}" class="{{c.down}} general foundicon-down-arrow" style=""></i>
  </a>
+{% endifnotequal %}
  <a id="togcom{{c.id}}" href="#" style="float: left;                                        
 					margin-top: 3px;margin-right: 5px; 
 					text-decoration: underline;
