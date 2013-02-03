@@ -8,19 +8,57 @@ import os
 import redis
 from django.db.models import F
 
+def follow_thread(uid,tid):
+    try:
+        r = redis.Redis()
+        r.sadd('uflw:'+str(uid),str(tid))
+        r.sadd('tflw:'+str(tid),str(uid))
+        return True
+    except:
+        return False
+
+def unfollow_thread(uid,tid):
+    try:
+        r = redis.Redis()
+        r.srem('uflw:'+str(uid),str(tid))
+        r.srem('tflw:'+str(tid),str(uid))
+        return True
+    except:
+        return False
+
+def is_following(uid,tid):
+    try:
+        r = redis.Redis()
+        if r.sismember('uflw:'+str(uid),str(tid)):
+            return 1
+        return 0
+    except:
+        return 0
+
+def get_follows(uid):
+    try:
+        r = redis.Redis()
+        tids = r.smembers('uflw:'+str(uid))
+        return [int(tid) for tid in tids]
+    except:
+        return []
+
 def get_user_id(username):
     try:
         return LcUser.objects.filter(user__username = username)[0].id
-    else:
+    except:
         return -1
 
-def notify(uid,cid):
+def notify(uid,cid,reply):
     """
     notify user about a reply to his-her comment from another user
     """
     try:
         r = redis.Redis()
-        r.zadd('not:'+str(uid),str(cid),int(time()))
+        if reply:
+            r.zadd('not:'+str(uid),str(cid),int(time()))
+        else:
+            r.zadd('not:'+str(uid),str(cid),0)
     except:
         return None # fail silent - not a big deal
 

@@ -1,3 +1,41 @@
+function followThread(id){
+    if($("#flw"+id).html()=='takip-edelim-bunu'){
+	$.ajax({
+		url: '/follow/',
+		    type: 'POST',
+		    data: {'tid':id},
+		    success: function(response){
+		    response = JSON.parse(response);
+		    if(response.result == 0){
+			$("#flw"+id).html('takip-etmeyelim');
+			$("#flw"+id).css("color","gray");
+		    }else{
+			alert(response.result);
+			$("#flw"+id).html('olmadi :(');
+			$("#flw"+id).css("color","black");
+		    }
+		}});
+    }else{
+	$.ajax({
+                url: '/unfollow/',
+                    type: 'POST',
+                    data: {'tid':id},
+                    success: function(response){
+		    response = JSON.parse(response);
+		    if(response.result == 0){
+			$("#flw"+id).html('takip-edelim-bunu');
+			$("#flw"+id).css("color","black");
+		    }else{
+			$("#flw"+id).html('olmadi :(');
+			$("#flw"+id).css("color","black");
+			alert(response.error);
+		    }
+		}});
+    }
+    $("#flw"+id).html('oluyo...');
+    $("#flw"+id).css("color","black");
+}
+
 function toggleInlineTag(id){
     $("#tagwrap"+id).toggleClass("dp-none");
     if($("#tagwrap"+id).hasClass("dp-none")){

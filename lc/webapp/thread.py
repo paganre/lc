@@ -1,5 +1,4 @@
 from webapp.models import Thread,Domain,LcUser,Comment
-from webapp import comment as c
 from webapp.struct.subthread import Subthread
 from django.db import connection
 from time import time
@@ -9,6 +8,7 @@ from django.db.models import F
 from webapp import alfred
 from webapp import tagger
 from webapp.pretty_time import pretty_time
+import redis
 
 def generateId():
     return int(os.urandom(4).encode('hex'),16) / 2

@@ -2,6 +2,8 @@ from webapp.models import Thread,Domain,LcUser,Comment
 from webapp import user as u
 from django.db import connection
 from time import time
+from webapp.pretty_time import pretty_time
+from webapp import thread as t
 import traceback
 import os
 
@@ -17,9 +19,18 @@ def add_comment(uid,tid,text,parent=None):
             parent = Comment.objects.get(pk = int(parent))
         c = Comment(id = id, creator=creator, thread = thread, parent = parent, text=text, time_created = int(time()))
         c.save()
+        notified = [creator.id]
         if (parent != None):
             if parent.creator.id != creator.id:
-                u.notify(parent.creator.id,c.id)
+                u.notify(parent.creator.id,c.id,True)
+                notified.append(parent.creator.id)
+
+        followers = t.get_followers(int(tid))
+        
+        for f in followers:
+            if f not in notified:
+                u.notify(f,c.id,False,tid=int(tid))
+        
         return (True,id)
     except:
         connection._rollback()
@@ -31,7 +42,7 @@ def get_comment(cid):
         return (True,{'id':comment.id,
                       'creator_name':comment.creator.user.username,
                       'creator_id':comment.creator.id,
-                      'time':comment.time_created,
+                      'time':pretty_time(int(comment.time_created)),
                       'text':comment.text,
                       'net_vote':comment.up-comment.down})
     except:
@@ -43,7 +54,7 @@ def comment_to_dict(comment):
             'creator_name':comment.creator.user.username,
             'creator_id':comment.creator.id,
             'text':comment.text,
-            'time':comment.time_created,
+            'time':pretty_time(int(comment.time_created)),
             'net_vote':comment.up-comment.down}
 
 def get_comment_fields(subthread):
@@ -55,7 +66,7 @@ def get_comment_fields(subthread):
         out.append({'id':comment.id,
                     'creator_name':comment.creator.user.username,
                     'creator_id':comment.creator.id,
-                    'time':comment.time_created,
+                    'time':pretty_time(int(comment.time_created)),
                     'text':comment.text,
                     'net_vote':comment.up-comment.down})
     return out

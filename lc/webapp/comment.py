@@ -18,9 +18,18 @@ def add_comment(uid,tid,text,parent=None):
             parent = Comment.objects.get(pk = int(parent))
         c = Comment(id = id, creator=creator, thread = thread, parent = parent, text=text, time_created = int(time()))
         c.save()
+        notified = [creator.id]
         if (parent != None):
             if parent.creator.id != creator.id:
-                u.notify(parent.creator.id,c.id)
+                u.notify(parent.creator.id,c.id,True)
+                notified.append(parent.creator.id)
+
+        followers = u.get_followers(int(tid))
+        
+        for f in followers:
+            if f not in notified:
+                u.notify(f,c.id,False)
+        
         return (True,id)
     except:
         connection._rollback()

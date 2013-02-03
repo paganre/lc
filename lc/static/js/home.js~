@@ -1,3 +1,36 @@
+function followThread(id){
+    if($("#flw"+id).html()=='takip-edelim-bunu'){
+	$.ajax({
+		url: '/follow/',
+		    type: 'POST',
+		    data: {'tid':id},
+		    success: function(response){
+		    response = JSON.parse(response);
+		    if(response.result == 0){
+			$("#flw"+id).html('daha-fazla-takip-etme');
+		    }else{
+			alert(response.result);
+			$("#flw"+id).html('olmadi :(');
+		    }
+		}});
+    }else{
+	$.ajax({
+                url: '/unfollow/',
+                    type: 'POST',
+                    data: {'tid':id},
+                    success: function(response){
+		    response = JSON.parse(response);
+		    if(response.result == 0){
+			$("#flw"+id).html('takip-edelim-bunu');
+                    }else{
+			$("#flw"+id).html('olmadi :(');
+			alert(response.error);
+		    }
+		}});
+    }
+    $("#flw"+id).html('oluyo...');
+}
+
 function toggleInlineTag(id){
     $("#tagwrap"+id).toggleClass("dp-none");
     if($("#tagwrap"+id).hasClass("dp-none")){
@@ -28,7 +61,7 @@ function tag(id){
 			setTimeout(function(){tagEnable(id);},2000);
 		    }else{
 			$("#tagalert"+id).html('olmadi: '+response.error);
-			setTimeout(function(){tagEnable(id);},2000);
+			setTimeout(function(){tagEnable(id);},3000);
 		    }
 		}
 	    });

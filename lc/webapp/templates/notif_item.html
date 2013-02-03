@@ -1,6 +1,10 @@
 <div id="notitem{{cid}}">
   <a href="#" onclick="removeNot({{cid}});return false;"><i class="general foundicon-remove" style="float: right;font-size: 12px;margin-top: 2px;color:black"></i></a>
   <p style="font-size:12px !important; padding: 10px 10px;border-left: 1px solid gray;border-bottom: 1px solid gray;margin-bottom:0px;">
+    {% if reply == 1 %}
     <strong>{{creator}}</strong> sana surada bi cevap yazmis: <strong><a href="/t/{{tid}}?not={{cid}}" class="lc-top-link" style="text-decoration:underline;">{{title}}</a></strong>
+    {% else %}
+    <strong>{{creator}}</strong> yeni yorum ekledi bak buraya (takip ediyosun ya sen bunu hani): <strong><a href="/t/{{tid}}?not={{cid}}" class="lc-top-link" style="text-decoration:underline;">{{title}}</a></strong>
+    {% endif %}
   </p>
 </div>

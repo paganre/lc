@@ -17,6 +17,8 @@ urlpatterns = patterns('',
     url(r'^u/(?P<username>\w+)','webapp.views.userpage'),
     url(r'^tag/$','webapp.views.tag'),
     url(r'^tag/(?P<tagid>\d+)','webapp.views.get_tag'),
+    url(r'^follow/$','webapp.views.follow'),
+    url(r'^unfollow/$','webapp.views.unfollow'),
 )
 
 

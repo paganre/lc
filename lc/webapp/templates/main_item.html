@@ -48,8 +48,14 @@
 	  <div id="qcparent{{header.id}}" style="margin-top: 5px;
 		      font-size: 12px;
 		      font-weight: bold;
-		      text-shadow: 0.1em 0.1em white;">
+		      text-shadow: 0.1em 0.1em white;
+		      max-width:500px;">
 	    <a href="#" id="qct{{header.id}}" onclick="openQuickComment({{header.id}});return false;" class="lc-top-link">hizlica-bi-yorum-yaz</a>
+	    {% if header.following == 0 %}
+	    <a href="#" id="flw{{header.id}}" onclick="followThread({{header.id}});return false;" style="float:right;" class="lc-top-link">takip-edelim-bunu</a>
+	    {% else %}
+	    <a href="#" id="flw{{header.id}}" onclick="followThread({{header.id}});return false;" style="float:right; color:gray;" class="lc-top-link">takip-etmeyelim</a>
+	    {% endif %}
 	    <div id="qcd{{header.id}}" class="dp-none" style="max-width:500px; margin-top:5px;">
 	      <textarea id="qcf{{header.id}}"></textarea>
 	      <a href="#" class="secondary small button" onclick="sendQuickComment({{header.id}});return false;" style="float:right">Yolla</a>
