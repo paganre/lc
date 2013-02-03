@@ -44,7 +44,7 @@ def get_tag(request,tagid):
         else:
             h['comments'] = []
         if uid != -1:
-            h['following'] = u.is_following(uid,int(tid))
+            h['following'] = u.is_following(uid,h.id)
         else:
             h['following'] = 0
     
@@ -301,7 +301,7 @@ def home(request):
         else:
             h['comments'] = []
         if uid != -1:
-            h['following'] = u.is_following(uid,int(tid))
+            h['following'] = u.is_following(uid,int(h['id']))
     
     tags = tagger.get_top_tags(5)
     

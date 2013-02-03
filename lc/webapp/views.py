@@ -44,7 +44,7 @@ def get_tag(request,tagid):
         else:
             h['comments'] = []
         if uid != -1:
-            h['following'] = u.is_following(uid,h.id)
+            h['following'] = u.is_following(uid,h['id'])
         else:
             h['following'] = 0
     
