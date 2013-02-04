@@ -1,4 +1,4 @@
-from webapp.models import Thread,LcUser,Domain,Comment
+from webapp.models import Thread,LcUser,Domain,Comment, Tag
 from django.db import connection
 from webapp import comment as c
 import traceback
@@ -7,6 +7,14 @@ from time import time
 
 def get_time_ordered():
     return [t.id for t in Thread.objects.all().order_by('-time_created')[:50]]
+
+def get_time_ordered_tag(tagid):
+    try:
+        threads = Tag.objects.get(id=int(tagid)).threads.all().order_by('-time_created')
+        tids = [t.id for t in threads]
+        return tids
+    except:
+        return []
 
 def get_best_subthread(tid):
     """

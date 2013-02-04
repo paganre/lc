@@ -36,7 +36,7 @@ def cus(request):
 def get_tag(request,tagid):
     if not mario.check_ip(request):
         HttpResponseRedirect("/cus")
-    tids = tagger.get_threads(tagid)
+    tids = alfred.get_time_ordered_tag(tagid)
     headers = [t.get_thread_header(tid) for tid in tids]
     headers = [h[1] for h in headers if h[0]]
     
