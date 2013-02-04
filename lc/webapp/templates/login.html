@@ -57,4 +57,16 @@
 <script>
   $("#register-button").click(register);
   $("#login-button").click(loginWith);
+  $("#password").keypress(function(e){
+    if(e.which==13){
+    if(!$("#rnickname").val()&&!$("#rpassword").val()&&!$("#remail").val())
+     loginWith();
+    }
+  });
+  $("#remail").keypress(function(e){
+    if(e.which==13){
+    if(!$("#nickname").val()&&!$("#password").val())
+     register();
+    }
+  });
 </script>

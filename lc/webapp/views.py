@@ -11,8 +11,9 @@ from webapp.aleister import Aleister
 from webapp import thread as t
 from webapp import domain as d
 from webapp import comment as c
-from webapp import user as u 
+from webapp import user as u
 from webapp import tagger
+from webapp import mario
 import json
 import traceback
 import requests
@@ -56,6 +57,8 @@ def get_tag(request,tagid):
 
 @csrf_protect
 def tag(request):
+    if not mario.is_ajax_post(request):
+        return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
         try:
             tag = request.POST.get('tag','')
@@ -74,6 +77,8 @@ def tag(request):
 
 @csrf_protect
 def follow(request):
+    if not mario.is_ajax_post(request):
+        return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
         try:
             uid = int(request.session['uid'])
@@ -89,6 +94,8 @@ def follow(request):
 
 @csrf_protect
 def unfollow(request):
+    if not mario.is_ajax_post(request):
+        return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
         try:
             uid = int(request.session['uid'])
@@ -102,6 +109,8 @@ def unfollow(request):
 
 @csrf_protect
 def rem_notif(request):
+    if not mario.is_ajax_post(request):
+        return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
         try:
             uid = int(request.session['uid'])
@@ -114,6 +123,8 @@ def rem_notif(request):
         return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
 
 def notif(request):
+    if not mario.is_ajax_get(request):
+        return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
         try:
             notifs = u.get_notifs(int(request.session['uid']))
@@ -140,6 +151,8 @@ def notif(request):
 
 @csrf_protect
 def vote(request):
+    if not mario.is_ajax_post(request):
+        return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
         try:
             cid = int(request.POST.get('cid',''))
@@ -226,6 +239,8 @@ def retrieve(request):
     """
     used to retrieve html with ajax requests - with page parameters
     """
+    if not mario.is_ajax_post(request):
+        return HttpResponseRedirect("/")
     try:
         type = request.POST.get('type','')
         if type == 'comment':
@@ -259,6 +274,8 @@ def retrieve(request):
 
 @csrf_protect
 def scribe(request):
+    if not mario.is_ajax_post(request):
+        return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
         try:
             tid = int(request.POST.get('tid',''))
@@ -316,6 +333,8 @@ def submit(request):
 
 @csrf_protect
 def link(request):
+    if not mario.is_ajax_post(request):
+        return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated():
         link_ = request.POST.get('link','')
         # head request to link
@@ -348,6 +367,8 @@ def link(request):
 
 @csrf_protect
 def create(request):
+    if not mario.is_ajax_post(request):
+        return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated():
         link = request.POST.get('link','')
         title = request.POST.get('title','')
@@ -385,6 +406,8 @@ def create(request):
 
 @csrf_protect
 def register(request):
+    if not mario.is_ajax_post(request):
+        return HttpResponseRedirect("/")
     name = request.POST.get('username','')
     password = request.POST.get('password','')
     email = request.POST.get('email','')
@@ -398,6 +421,8 @@ def register(request):
 
 @csrf_protect
 def login(request):
+    if not mario.is_ajax_post(request):
+        return HttpResponseRedirect("/")
     name = request.POST.get('username','')
     password = request.POST.get('password','')
     if name and password:

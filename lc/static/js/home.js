@@ -199,19 +199,23 @@ function login(){
 function loginWith(){
     name = $("#nickname").val();
     password = $("#password").val();
-    $.ajax({
-            url: '/login/',
-		type: 'POST',
-		data: {'username':name,'password':password},
-                success: function(response) {
-		response = JSON.parse(response);
-		if(response.result == 0){
-		    location.reload();
-		}else{
-		    showLoginError(response.error);
-		}
-            }
-        });
+    if (!hasWhiteSpace(name)) {
+        $.ajax({
+               url: '/login/',
+               type: 'POST',
+               data: {'username':name,'password':password},
+               success: function(response) {
+               response = JSON.parse(response);
+               if(response.result == 0){
+               location.reload();
+               }else{
+               showLoginError(response.error);
+               }
+               }
+               });
+    }else{
+        showLoginError("Nickde whitespace ne ayak");
+    }
 }
 
 function showLoginError(text){
@@ -228,7 +232,8 @@ function register(){
     name = $("#rnickname").val();
     password = $("#rpassword").val();
     email = $("#remail").val();
-    $.ajax({
+    if (!hasWhiteSpace(name)){
+        $.ajax({
             url: '/register/',
                 type: 'POST',
                 data: {'username':name,'password':password,'email':email},
@@ -239,7 +244,12 @@ function register(){
 		}else{
 		    showRegisterError(response.error);
 		}
-		
-            }
-        });
+		}});
+    }else{
+        showRegisterError("Nickde whitespace ne ayak");
+    }
+}
+
+function hasWhiteSpace(s) {
+    return /\s/g.test(s);
 }
