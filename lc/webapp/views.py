@@ -29,7 +29,13 @@ from webapp.pretty_time import pretty_time
 # More info: https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
 
 @csrf_protect
+def cus(request):
+    return render_to_response('cus.html')
+
+@csrf_protect
 def get_tag(request,tagid):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     tids = tagger.get_threads(tagid)
     headers = [t.get_thread_header(tid) for tid in tids]
     headers = [h[1] for h in headers if h[0]]
@@ -57,6 +63,8 @@ def get_tag(request,tagid):
 
 @csrf_protect
 def tag(request):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
@@ -77,6 +85,8 @@ def tag(request):
 
 @csrf_protect
 def follow(request):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
@@ -94,6 +104,8 @@ def follow(request):
 
 @csrf_protect
 def unfollow(request):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
@@ -109,6 +121,8 @@ def unfollow(request):
 
 @csrf_protect
 def rem_notif(request):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
@@ -123,6 +137,8 @@ def rem_notif(request):
         return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
 
 def notif(request):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     if not mario.is_ajax_get(request):
         return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
@@ -151,6 +167,8 @@ def notif(request):
 
 @csrf_protect
 def vote(request):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
@@ -169,6 +187,8 @@ def vote(request):
 
 @csrf_protect
 def thread(request,tid):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     try:
         th = t.get_full_thread(int(tid))
         if(th[0]):
@@ -215,6 +235,8 @@ def thread(request,tid):
 
 @csrf_protect
 def userpage(request,username):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     #if request.user.username==username and request.user.is_authenticated() and 'uid' in request.session:
     res = u.get_commented_threads(u.get_user_id(username))
     if res[0]:
@@ -239,6 +261,8 @@ def retrieve(request):
     """
     used to retrieve html with ajax requests - with page parameters
     """
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
     try:
@@ -274,6 +298,8 @@ def retrieve(request):
 
 @csrf_protect
 def scribe(request):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
@@ -297,6 +323,8 @@ def scribe(request):
 
 @csrf_protect
 def home(request):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     s = request.GET.get('s','')
     if s == 'a':
         algorithm_works = True
@@ -326,6 +354,8 @@ def home(request):
 
 @csrf_protect
 def submit(request):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     if request.user and request.user.is_authenticated():
         return render_to_response('submit.html',{"user": request.user},context_instance=RequestContext(request))
     else:
@@ -333,6 +363,8 @@ def submit(request):
 
 @csrf_protect
 def link(request):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated():
@@ -367,6 +399,8 @@ def link(request):
 
 @csrf_protect
 def create(request):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated():
@@ -406,6 +440,8 @@ def create(request):
 
 @csrf_protect
 def register(request):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
     name = request.POST.get('username','')
@@ -421,6 +457,8 @@ def register(request):
 
 @csrf_protect
 def login(request):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
     name = request.POST.get('username','')
@@ -435,5 +473,7 @@ def login(request):
         
 
 def logoutUser(request):
+    if not mario.check_ip(request):
+        HttpResponseRedirect("/cus")
     auth.logout(request)
     return HttpResponseRedirect("/")
