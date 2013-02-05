@@ -247,7 +247,7 @@ def userpage(request,username):
         headers = []
         for r in res[1]:
             header = t.get_thread_header(r[0])
-            if header[0]:
+            if header[0] and (not mario.is_spam(header[1]['id'])):
                 sub = []
                 for cid in r[1]:
                     try:
