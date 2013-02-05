@@ -25,7 +25,7 @@
 	    {% else %}
 	    <div style="margin-left:15px;padding:5px 5px;">
 	    {% endif %}
-	      <div style="padding:3px 3px; font-size:12px !important">[{{c.net_vote}}] <a href="/u/{{c.creator_name}}" class="lc-top-link"><strong>{{c.creator_name}}</strong></a> {{c.time}} once</div>
+	      <div style="padding:3px 3px; font-size:12px !important">[{{c.net_vote}}] <a href="/u/{{c.creator_name}}" class="lc-top-link"><strong>{{c.creator_name}}</strong></a> {{c.time}}</div>
 	      <div style="padding:3px 3px; font-size:12px !important">{{c.text}}</div>
 	      {% if forloop.counter == header.comments|length %}
      	      <div id="cmore{{header.id}}" style="margin-top:5px;">

@@ -192,7 +192,7 @@ def logout(request):
 def get_commented_threads(uid):
     try:
         creator = LcUser.objects.get(pk = int(uid))
-        user_comments = creator.comment_set.all()
+        user_comments = creator.comment_set.all().order_by('-time_created')
         user_threads = []
         for c in user_comments:
             tid = c.thread.id
