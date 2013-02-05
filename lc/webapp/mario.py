@@ -9,14 +9,16 @@ def is_ajax_get(request):
     return (request.is_ajax() and request.method == 'GET')
 
 def is_spam(tid):
+    r = redis.Redis(db = 1)
     res = t.get_thread_header(tid)
     # We will write a function in Mario to update the spamlist
-    # Redis implementation here
-    banned_thread_list = ('2118349089',)
+    #banned_thread_list = ('2118349089',)
+    banned_thread_list = r.sdiff('banned_thread')
     for tidb in banned_thread_list:
         if tid == int(tidb):
             return True
-    rejected_domain_list = ('1russianbrides.com',)
+    #rejected_domain_list = ('1russianbrides.com',)
+    rejected_domain_list = r.sdiff('banned_domain')
     for spam in rejected_domain_list:
         if res[1]['domain'].find(spam) != -1:
             return True
