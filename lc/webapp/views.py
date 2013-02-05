@@ -36,13 +36,18 @@ def cus(request):
 def get_tag(request,tagid):
     if not mario.check_ip(request):
         HttpResponseRedirect("/cus")
-    tids = alfred.get_time_ordered_tag(tagid)
+    tids_b = alfred.get_time_ordered_tag(tagid)
     headers = [t.get_thread_header(tid) for tid in tids]
     headers = [h[1] for h in headers if h[0]]
     
     uid = -1
     if 'uid' in request.session:
         uid = int(request.session['uid'])
+
+    tids = []
+    for tid in tids_b:
+        if not mario.is_spam(tid):
+            tids = tids + [tid]
 
     for h in headers:
         res = alfred.get_best_subthread(h['id'])
@@ -328,14 +333,19 @@ def home(request):
     s = request.GET.get('s','')
     if s == 'a':
         algorithm_works = True
-        tids = alfred.get_best()
+        tids_b = alfred.get_best()
     else:
         algorithm_works = False
-        tids = alfred.get_time_ordered()
+        tids_b = alfred.get_time_ordered()
     
     uid = -1
     if 'uid' in request.session:
         uid = int(request.session['uid'])
+
+    tids = []
+    for tid in tids_b:
+        if not mario.is_spam(tid):
+            tids = tids + [tid]
 
     headers = [t.get_thread_header(tid) for tid in tids]
     headers = [h[1] for h in headers if h[0]]

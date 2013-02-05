@@ -1,11 +1,22 @@
 from django.http import HttpRequest
 import redis
+from webapp import thread as t
 
 def is_ajax_post(request):
     return (request.is_ajax() and request.method == 'POST')
 
 def is_ajax_get(request):
     return (request.is_ajax() and request.method == 'GET')
+
+def is_spam(tid):
+    res = t.get_thread_header(tid)
+    # We will write a function in Mario to update the spamlist
+    rejected_domain_list = ('1russianbrides.com')
+    for spam in rejected_domain_list:
+        if res[1]['domain'].find(spam) != -1:
+            return True
+        else:
+            return False
 
 def check_ip(request):
     r = redis.Redis()

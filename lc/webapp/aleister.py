@@ -73,7 +73,8 @@ class Aleister(HTMLParser.HTMLParser):
 
     def parse_domain(self, url):
         host = urlparse(url).hostname
-        if(len(host.split('.'))>2):
+        # Just remove www, not subdomains
+        if(host.split('.')=='www'):
             host = '.'.join(host.split('.')[1:])
         # some experimental stuff
         problematic_chars = {'-','/','\\',':'}
