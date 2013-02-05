@@ -238,12 +238,14 @@ def thread(request,tid):
         return HttpResponse(str(traceback.format_exc())+"th[2] is :"+str(th[2])+"\r\n\ i was:"+str(i))
 
 @csrf_protect
-def userpage(request,username):
+def userpage(request,uid):
     if not mario.check_ip(request):
         HttpResponseRedirect("/cus")
     #if request.user.username==username and request.user.is_authenticated() and 'uid' in request.session:
-    res = u.get_commented_threads(u.get_user_id(username))
+    #res = u.get_commented_threads(u.get_user_id(username))
+    res = u.get_commented_threads(int(uid))
     if res[0]:
+        username = u.get_user_name(int(uid))
         headers = []
         for r in res[1]:
             header = t.get_thread_header(r[0])

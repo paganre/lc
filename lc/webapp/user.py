@@ -57,6 +57,12 @@ def get_user_id(username):
     except:
         return -1
 
+def get_user_name(uid):
+    try:
+        return LcUser.objects.filter(id = int(uid))[0].user.username
+    except:
+        return ''
+
 def notify(uid,cid,reply):
     """
     notify user about a reply to his-her comment from another user

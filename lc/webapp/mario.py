@@ -12,11 +12,13 @@ def is_spam(tid):
     r = redis.Redis(db = 1)
     res = t.get_thread_header(tid)
     # We will write a function in Mario to update the spamlist
+    
     #banned_thread_list = ('2118349089',)
     banned_thread_list = r.sdiff('banned_thread')
     for tidb in banned_thread_list:
         if tid == int(tidb):
             return True
+
     #rejected_domain_list = ('1russianbrides.com',)
     rejected_domain_list = r.sdiff('banned_domain')
     for spam in rejected_domain_list:
