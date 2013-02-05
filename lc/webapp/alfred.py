@@ -70,11 +70,11 @@ def contro(up, down, views, time_created):
     # Given total up votes, total down votes and total views of a thread
     # Quantifies how controversial a thread is
     # Controlversiality = (a_1 (Total views) + a_2 (Positive vote estimation) + a_3 (Total votes))/(a_4 + a_5 (time after creation))
-    a1 = 0.2
+    a1 = 0.01
     a2 = 1
     a3 = 0.6
     a_4 = 2
-    a_5 = 1/86400
+    a_5 = 1/21600
     
     n = up + down
     if n==0:
