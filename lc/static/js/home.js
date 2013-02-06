@@ -9,11 +9,13 @@ function followThread(id){
 		    if(response.result == 0){
 			$("#flw"+id).html('takip-etmeyelim');
 			$("#flw"+id).css("color","gray");
-		    }else{
-			alert(response.result);
-			$("#flw"+id).html('olmadi :(');
+		    }else if(response.error == 'not authed'){
+			$("#flw"+id).html('olmadi :( uye girisi lazim');
 			$("#flw"+id).css("color","black");
-		    }
+            }else {
+            $("#flw"+id).html('olmadi :(');
+            $("#flw"+id).css("color","black");
+            }
 		}});
     }else{
 	$.ajax({
@@ -25,10 +27,12 @@ function followThread(id){
 		    if(response.result == 0){
 			$("#flw"+id).html('takip-edelim-bunu');
 			$("#flw"+id).css("color","black");
+            }else if(response.error == 'not authed'){
+            $("#flw"+id).html('olmadi :( uye girisi lazim');
+            $("#flw"+id).css("color","black");
 		    }else{
 			$("#flw"+id).html('olmadi :(');
 			$("#flw"+id).css("color","black");
-			alert(response.error);
 		    }
 		}});
     }
@@ -77,6 +81,7 @@ function tag(id){
 function tagEnable(id){
     $("#tagopen"+id).removeClass("dp-none");
     $("#tagalert"+id).addClass("dp-none");
+    location.reload();
 }
 
 function removeNot(cid){
@@ -124,7 +129,9 @@ function sendQuickComment(id){
                 response = JSON.parse(response);
                 if(response.result == 0){
                     $("#qclabel"+id).html("yorumun eklendi");
-		    getNewComment(response.id,id);
+                    getNewComment(response.id,id);
+                }else if(response.error=='not authed'){
+                    $("#qclabel"+id).html("yorum yazabilmek icin uye girisi yapman lazim");
                 }else{
                     $("#qclabel"+id).html("bi problem cikti: "+response.error);
                 }

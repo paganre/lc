@@ -15,9 +15,19 @@ function submitLink(){
 		    $("#submit-container").html(response.html);
 		    suggested_title = $("#title-field").val();
 		    domain = $("#domain-label").html();
-		}else{
-                    alert(response.error);
-                }
+            }else if(response.error=='check url'){
+             if($("#error-label").hasClass("dp-none")){
+             $("#error-label").removeClass("dp-none");}
+            $("#error-label").html("urlde sorun var, baska link dene");
+            }else if(response.error=='not authed'){
+             if($("#error-label").hasClass("dp-none")){
+             $("#error-label").removeClass("dp-none");}
+            $("#error-label").html("uye girisi gerekli");
+            }else{
+             if($("#error-label").hasClass("dp-none")){
+             $("#error-label").removeClass("dp-none");}
+            $("#error-label").html("olmadi :( bir daha dene");
+            }
             }
         });
     return false;
@@ -36,7 +46,11 @@ function createThread(){
                 success: function(response) {
                 response = JSON.parse(response);
                 if(response.result == 0){
-		    window.location = '/t/'+response.tid;
+                    window.location = '/t/'+response.tid;
+                }else if(response.error=='texists'){
+                    if($("#thlink").hasClass("dp-none")){
+                    $("#thlink").removeClass("dp-none");}
+                    $("#thlink").attr("href", "/t/"+response.tid)
                 }else{
                     alert(response.error);
                 }

@@ -388,7 +388,7 @@ def link(request):
         try:
             r = requests.head(link)
         except:
-            return HttpResponse(json.dumps({'result':0,'error':'unreachable, check url'}))
+            return HttpResponse(json.dumps({'result':0,'error':'check url'}))
         if r.ok:
             r = requests.get(link)
             crawler = Aleister()
@@ -442,8 +442,7 @@ def create(request):
         else:
             if(ds_res[0]==1):
                 # A thread with same domain name and suggested title exists
-                msg = 'Haber sitede. Thread id: '+str(ds_res[1])
-                return HttpResponse(json.dumps({'result':-1,'error':msg}))
+                return HttpResponse(json.dumps({'result':-1,'error':'texists', 'tid':str(ds_res[1])}))
             else:
                 return HttpResponse(json.dumps({'result':-1,'error':'DB error'}))
     else:
