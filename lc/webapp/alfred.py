@@ -2,7 +2,7 @@ from webapp.models import Thread,LcUser,Domain,Comment, Tag
 from django.db import connection
 from webapp import comment as c
 import traceback
-from math import sqrt
+from math import sqrt, exp
 from time import time
 
 def get_time_ordered():
@@ -13,6 +13,19 @@ def get_time_ordered_tag(tagid):
         threads = Tag.objects.get(id=int(tagid)).threads.all().order_by('-time_created')
         tids = [t.id for t in threads]
         return tids
+    except:
+        return []
+
+def get_best_ordered_tag(tagid):
+    try:
+        res = []
+        for t in Tag.objects.get(id=int(tagid)).threads.all():
+            res = res + [(t.id,contro(t.up, t.down, t.views, t.time_created))]
+        res.sort(key=lambda l: l[1], reverse=True)
+        tid = []
+        for r in res:
+            tid = tid + [r[0]]
+        return tid
     except:
         return []
 
@@ -69,12 +82,11 @@ def get_best():
 def contro(up, down, views, time_created):
     # Given total up votes, total down votes and total views of a thread
     # Quantifies how controversial a thread is
-    # Controlversiality = (a_1 (Total views) + a_2 (Positive vote estimation) + a_3 (Total votes))/(a_4 + a_5 (time after creation))
+    # Controlversiality = (a_1 (Total views) + a_2 (Positive vote estimation) + a_3 (Total votes))*(1 - exp(-a_4 (time after creation)))
     a1 = 0.01
     a2 = 1
     a3 = 0.6
-    a_4 = 2
-    a_5 = 1/21600
+    a4 = 1/3600
     
     n = up + down
     if n==0:
@@ -101,8 +113,8 @@ def contro(up, down, views, time_created):
     # up_estimate = up_estimate + z * sqrt((up_estimate*(1-up_estimate)+z*z/(4*n))/n)
     # up_estimate = up_estimate/(1+z*z/n)
     
-    time_elapsed = time_created - int(time())
+    time_elapsed = int(time()) - time_created
 
     # ------------------------
     # Combine elements and return controversiality
-    return (a1*views + a2*up_vote_estimate + a3*n)/(a_4 + a_5*time_elapsed)
+    return (a1*views + a2*up_vote_estimate + a3*n)*exp(-time_elapsed*a4)

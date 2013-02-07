@@ -36,7 +36,13 @@ def cus(request):
 def get_tag(request,tagid):
     if not mario.check_ip(request):
         HttpResponseRedirect("/cus")
-    tids_b = alfred.get_time_ordered_tag(tagid)
+    s = request.GET.get('s', '')
+    if s == 'a':
+        algorithm_works = True
+        tids_b = alfred.get_best_ordered_tag(tagid)
+    else:
+        algorithm_works = False
+        tids_b = alfred.get_time_ordered_tag(tagid)
     tids = []
     for tid in tids_b:
         if not mario.is_spam(tid):
@@ -63,7 +69,7 @@ def get_tag(request,tagid):
     uid = -1
     if 'uid' in request.session:
         uid = int(request.session['uid'])
-    return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":tags},context_instance=RequestContext(request))
+    return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":tags,"algorithm_works":algorithm_works},context_instance=RequestContext(request))
 
 @csrf_protect
 def tag(request):
@@ -480,6 +486,13 @@ def login(request):
         else:
             return HttpResponse(json.dumps({'result':-1,'error':res[1]}))
     return HttpResponse(json.dumps({'result':-1,'error':'Fields not set'}))
+
+def stt(request):
+    unum = LcUser.objects.all().count()
+    tnum = Thread.objects.all().count()
+    cnum = Comment.objects.all().count()
+    res = "U: " + str(unum) + " T: " + str(tnum) + " C: " + str(cnum)
+    return HttpResponse(res)
         
 
 def logoutUser(request):

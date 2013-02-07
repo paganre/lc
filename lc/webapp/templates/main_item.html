@@ -10,7 +10,7 @@
 		      font-size: 12px;
 		      text-shadow: 0.1em 0.1em white;
 		      ">
-	    (<a href="/t/{{header.id}}" style="font-weight: bold;" class="lc-top-link"> {{header.num_comment}} yorum</a>, {{header.time}} 
+	    (<a href="/t/{{header.id}}" style="font-weight: bold;" class="lc-top-link"> {{header.num_comment}} yorum</a>, {{header.time}}
 	    <a href="/u/{{header.creator_id}}" style="font-weight: bold;" class="lc-top-link">{{header.creator_name}} </a> yaratti{% for tag in header.tags %} , <a href="/tag/{{tag.0}}" style="font-weight: bold;" class="lc-top-link">#{{tag.1}}</a>{% endfor %}){% if uid == header.creator_id %}{% include "inline_tag.html" %} {% endif %}
 	  </div>
 
