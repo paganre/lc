@@ -10,15 +10,6 @@ from webapp import tagger
 from webapp.pretty_time import pretty_time
 import redis
 
-def get_followers(tid):
-    try:
-        r = redis.Redis()
-        uids = r.smembers('tflw:'+str(tid))
-        return [int(uid) for uid in uids]
-    except:
-        return []
-
-
 def generateId():
     return int(os.urandom(4).encode('hex'),16) / 2
 

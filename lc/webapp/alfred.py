@@ -4,6 +4,50 @@ from webapp import comment as c
 import traceback
 from math import sqrt, exp
 from time import time
+import redis
+import msgpack
+
+
+def sort_threads():
+    """
+    returns algorithm sorted threads (re-renders the list if necessary)
+    """
+    try:
+        r = redis.Redis()
+        # check if sorting is necessary
+        if r.get('sorted:recently') == None:
+            print "sort necessary"
+            t0 = time()
+            ids = msgpack.unpackb(r.get('act:ids'),use_list = 1) # retrieved act-ids
+            print "acquired active ids (thread count:"+str(len(ids))+") in "+str(time()-t0)+" s"
+            t0 = time()
+            pipe = r.pipeline()
+            for id in ids:
+                pipe.hgetall('t:'+str(id))
+            stats = pipe.execute()
+            print "acquired thread stats in "+str(time()-t0)+" s"
+            t0 = time()
+            out = []
+            for ind,id in enumerate(ids):
+                stat = stats[ind]
+                out.append((id,contro(int(stat['up']),int(stat['down']), int(stat['view']), int(stat['time']))))
+            out.sort(key=lambda l: l[1], reverse=True)
+            sorted_ids = [o[0] for o in out]
+            print "sorted threads in "+str(time()-t0)+" s"
+            t0 = time()
+            r.set('act:sorted:ids',msgpack.packb(sorted_ids))
+            r.setex('sorted:recently',1,120)
+            print "saved sorted results in redis and set the sorted:recently flag in "+str(time()-t0)+" s"
+            return (True,sorted_ids) # sorted
+        else:
+            print "no sorting necessary"
+            t0 = time()
+            out = msgpack.unpackb(r.get('act:sorted:ids'),use_list=1)
+            print "retrieved sorted list from redis in "+str(time()-t0)+" s"
+            return (True,out) # no sorting
+    except:
+        return (False,str(traceback.format_exc()))
+
 
 def get_time_ordered():
     return [t.id for t in Thread.objects.all().order_by('-time_created')[:50]]

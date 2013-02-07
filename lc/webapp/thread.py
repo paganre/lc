@@ -91,6 +91,11 @@ def create_thread(creator_id, title,summary, suggested_title, domain, url):
                    domain = domain,
                    time_created = int(time()))
         t.save()
+        # add to act:ids
+        r = redis.Redis()
+        act_ids = msgpack.unpackb(r.get('act:ids'),use_list = 1)
+        act_ids = [tid] + act_ids
+        r.set('act:ids',msgpack.packb(act_ids))
         return (True,tid) # thread created - return thread id
     except:
         connection._rollback()
