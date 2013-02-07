@@ -9,6 +9,7 @@ from webapp import alfred
 from webapp import tagger
 from webapp.pretty_time import pretty_time
 import redis
+import msgpack
 
 def generateId():
     return int(os.urandom(4).encode('hex'),16) / 2
