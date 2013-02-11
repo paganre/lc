@@ -1,5 +1,6 @@
 from webapp.models import Thread,Domain,LcUser,Comment
 from webapp.struct.subthread import Subthread
+import msgpack
 from django.db import connection
 from time import time
 import traceback
@@ -9,15 +10,8 @@ from webapp import alfred
 from webapp import tagger
 from webapp.pretty_time import pretty_time
 import redis
-
-def get_followers(tid):
-    try:
-        r = redis.Redis()
-        uids = r.smembers('tflw:'+str(tid))
-        return [int(uid) for uid in uids]
-    except:
-        return []
-
+from django.core.cache import cache
+import msgpack
 
 def generateId():
     return int(os.urandom(4).encode('hex'),16) / 2
@@ -70,7 +64,11 @@ def get_full_thread(tid):
 
 def get_thread_header(tid):
     try:
-        t = Thread.objects.get(pk = int(tid))
+        # check cache
+        h = cache.get('t:head:'+str(tid))
+        if h == None:
+            t = Thread.objects.get(pk = int(tid))
+            h = 
         return (True,{'id':t.id,
                       'url':t.url,
                       'title':t.title,
@@ -100,6 +98,11 @@ def create_thread(creator_id, title,summary, suggested_title, domain, url):
                    domain = domain,
                    time_created = int(time()))
         t.save()
+        # add to act:ids
+        r = redis.Redis()
+        act_ids = msgpack.unpackb(r.get('act:ids'),use_list = 1)
+        act_ids = [tid] + act_ids
+        r.set('act:ids',msgpack.packb(act_ids))
         return (True,tid) # thread created - return thread id
     except:
         connection._rollback()

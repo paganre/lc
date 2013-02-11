@@ -1,5 +1,6 @@
 from webapp.models import Thread,Domain,LcUser,Comment
 from webapp.struct.subthread import Subthread
+import msgpack
 from django.db import connection
 from time import time
 import traceback
@@ -61,6 +62,8 @@ def get_full_thread(tid):
 
 def get_thread_header(tid):
     try:
+        # check cache
+        
         t = Thread.objects.get(pk = int(tid))
         return (True,{'id':t.id,
                       'url':t.url,
