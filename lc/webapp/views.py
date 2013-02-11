@@ -463,13 +463,19 @@ def register(request):
     name = request.POST.get('username','')
     password = request.POST.get('password','')
     email = request.POST.get('email','')
+    if (mario.is_username_banned(name) or mario.is_ip_banned(request)):
+        # Do something better here ...
+        return HttpResponseRedirect("/")
     if name and password:
         res = u.register(request,name,password,email)
         if(res[0]):
-            return HttpResponse(json.dumps({'result':0}))
+            if not mario.check_registration_ip(request):
+                return HttpResponse(json.dumps({'result':-1,'error':'Cok fazla hesap actin! Biraz bekle...'}))
+            else:
+                return HttpResponse(json.dumps({'result':0}))
         else:
-            return HttpResponse(json.dumps({'result':-1,'error':'Username taken'}))
-    return HttpResponse(json.dumps({'result':-1,'error':'Fields not set'}))
+            return HttpResponse(json.dumps({'result':-1,'error':'Nick alinmis'}))
+    return HttpResponse(json.dumps({'result':-1,'error':'Kutular bos'}))
 
 @csrf_protect
 def login(request):
@@ -479,6 +485,9 @@ def login(request):
         return HttpResponseRedirect("/")
     name = request.POST.get('username','')
     password = request.POST.get('password','')
+    if (mario.is_username_banned(name) or mario.is_ip_banned(request)):
+        # Do something better here ...
+        return HttpResponseRedirect("/")
     if name and password:
         res = u.login(request,name,password)
         if(res[0]):

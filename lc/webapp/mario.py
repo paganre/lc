@@ -26,21 +26,47 @@ def is_spam(tid):
             return True
     return False
 
-
-def check_ip(request):
-    r = redis.Redis()
+def is_ip_banned(request):
+    r = redis.Redis(db = 1)
     client_ip = get_client_ip(request)
-    if r.exists('ipflw:'+str(client_ip)):
-        num = r.get('ipflw:'+str(client_ip))
-        if num < 500:
-            r.incr('ipflw:'+str(client_ip))
+    return r.exists('ipban:'+str(client_ip))
+
+def is_username_banned(username):
+    r = redis.Redis(db = 1)
+    return r.exists('unameban:'+str(username))
+
+def check_registration_ip(request):
+    # User can register at most 5 accounts in 5 minutes
+    r = redis.Redis(db = 1)
+    client_ip = get_client_ip(request)
+    if r.exists('ipreg:'+str(client_ip)):
+        num = int(r.get('ipreg:'+str(client_ip)))
+        if num < 5:
+            r.incr('ipreg:'+str(client_ip))
             return True
         else:
             return False
     else:
-            r.set('ipflw:'+str(client_ip),1)
-            r.expire('ipflw:'+str(client_ip),300)
+        r.set('ipreg:'+str(client_ip),1)
+        r.expire('ipreg:'+str(client_ip),300)
+        return True
+
+
+def check_ip(request):
+    # At most 500 requests from the same IP in 5 minutes
+    r = redis.Redis(db = 1)
+    client_ip = get_client_ip(request)
+    if r.exists('ipreq:'+str(client_ip)):
+        num = int(r.get('ipreq:'+str(client_ip)))
+        if num < 500:
+            r.incr('ipreq:'+str(client_ip))
             return True
+        else:
+            return False
+    else:
+        r.set('ipreq:'+str(client_ip),1)
+        r.expire('ipreq:'+str(client_ip),300)
+        return True
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
