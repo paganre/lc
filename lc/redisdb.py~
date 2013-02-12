@@ -1,0 +1,250 @@
+import redis
+import msgpack
+import os
+from time import time
+
+"""
+Redis Structures:
+-----------------
+ Thread-Lists:
+  act:ids          list of active ids in a time-sorted manner
+  act:sorted:ids   list of active ids in an algorithm-sorted manner
+ Threads:
+  t:<tid>          msgpacked thread-header of thread (see: aux-structures)
+  t:tags:<tid>     list of tag-ids for thread
+  t:comm:<tid>     list of comment-ids for thread in a time-sorted manner
+  t:foll:<tid>     set of followers of the thread
+ Tags:
+  tag:<tagid>      name of the tag
+  tag:<tagname>    id of the tag
+  tag:t:<tagid>    thread list of the tags in a time-sorted manner
+ Comments:
+  c:<cid>          msgpacked comment (see:aux-structures)
+  c:up:<cid>       up-votes of comment
+  c:down:<cid>     down-votes of comment
+ Users:
+  u:<uid>          username of user
+  u:<uname>        id of user
+  u:comm:<uid>     comment-list of user
+  u:up:<uid>       user's up-voted comment set
+  u:down:<uid>     user's down-voted comment set
+  u:auth:<uid>     user's state token - expiry
+  auth:<state>     user id for given state token
+  u:pass:<uid>     user's password
+  u:time:<uid>     user's time of join
+  u:foll:<uid>     set of thread-id's that user is following
+  u:notif:<uid>    list of notifications for user (see: aux-structures)  
+
+Aux Structures:
+---------------
+ thread-header: {title,summary,url,domain,time,cid,cname}
+ comment: {text,time,pid,cid,cname} [pid is parent id it's either -1 or a comment id]
+ notification: {tid,cid,time,type} [type is either 1 (reply) or 0 (follow-notif)]
+
+"""
+
+def add_comment(tid,cid,text,parent=-1):
+    """
+    adds given comment to thread - notifies the followers and the parent commentor - returns comment_id
+    """
+    r = redis.Redis()
+    cname = r.get('u:'+str(cid))
+    if cname == None:
+        return (False,'Creator does not exist')
+    parent_comment = None
+    if parent != -1:
+        parent_comment = get_comments([parent])
+        if len(parent_comment) == 0:
+            return (False,'Parent comment does not exist')
+        parent_comment = parent_comment[0]
+
+    comment_id = generate_id()
+    comment_dict = {
+        'text':text,
+        'time':int(time()),
+        'pid':parent,
+        'cid':cid,
+        'cname':cname
+        }
+    r.set('c:'+str(comment_id),msgpack.packb(comment_dict))
+    r.lpush('t:comm:'+str(tid),comment_id)
+    r.lpush('u:comm:'+str(cid),comment_id)
+    notified = [cid]
+    if parent_comment != None:
+        parent_creator = int(parent_comment['cid'])
+        if parent_creator not in notified:
+            notified.append(parent_creator)
+            reply_notification = {
+                'tid':tid,
+                'cid':cid,
+                'time':int(time()),
+                'type':1
+                }
+            r.lpush('u:notif:'+str(parent_creator),msgpack.packb(reply_notification))
+    notification = {
+        'tid':tid,
+        'cid':cid,
+        'time':int(time()),
+        'type':0
+        }
+    for follower in r.lrange('t:foll:'+str(tid)):
+        if int(f) not in notified:
+            notified.append(int(f))
+            r.lpush('u:notif:'+str(f),msgpack.packb(notification))
+    return (True,comment_id)
+
+
+def get_comments(cids):
+    """
+    returns comments with ids [cids]
+    """
+    r = redis.Redis()
+    pipe = r.pipeline()
+    for cid in cids:
+        pipe.get('c:'+str(cid))
+    comments = pipe.execute()
+    for ind,c in enumerate(comments):
+        if c != None:
+            comments[ind] = msgpack.unpackb(c)
+    return comments
+
+
+def get_thread_headers(tids):
+    """
+    returns threads with ids [tids] adds the tags on the fly as a list of dict [{'id':<tagid>,'name':<tagname>}]
+    """
+    r = redis.Redis()
+    pipe = r.pipeline()
+    for tid in tids:
+        pipe.get('t:'+str(tid))
+    headers = pipe.execute()
+    for ind,h in enumerate(headers):
+        if h != None:
+            headers[ind] = msgpack.unpackb(h)
+            tid = tids[ind]
+            tags = r.lrange('t:tags:'+str(tid),0,-1)
+            tag_dicts = []
+            for tagid in tags:
+                tag_dicts.append({'id':tagid,'name':r.get('tag:'+str(tagid))})
+            headers[ind]['tags'] = tag_dicts
+    return headers
+
+
+def get_tag_by_id(tagid):
+    r = redis.Redis()
+    return r.get('tag:'+str(tagid))
+
+
+def get_tag_by_name(tagname):
+    r = redis.Redis()
+    tagid = r.get('tag:'+str(tagname))
+    if tagid == None:
+        # create tag here
+        tagid = generate_id()
+        r.set('tag:'+str(tagname),tagid)
+        r.set('tag:'+str(tagid),tagname)
+    return tagid
+
+
+def add_tags(tid,tags):
+    """
+    tags the thread with given tagids
+    """
+    r = redis.Redis()
+    for tagid in tags:
+        r.lpush('tags:t:'+str(tagid),tid)
+        r.lpush('t:tags:'+str(tid),tagid)
+
+
+def create_thread(title,url,domain,cid,tags=[],summary=''):
+    """
+    creates a thread and returns the thread id
+    tags is a list of tag-ids, the tags should be created (if not existent) prior to calling this function
+    """
+    r = redis.Redis()
+    cname = r.get('u:'+str(cid))
+    if cname == None:
+        return (False,'Creator not found')
+    tid = generate_id()
+    thread_header = {
+        'title':title,
+        'summary':summary,
+        'url':url,
+        'domain':domain,
+        'time':int(time()),
+        'cid':cid,
+        'cname':cname
+        }
+    for tagid in tags:
+        r.lpush('t:tags:'+str(tid),tagid)
+        r.lpush('tag:t:'+str(tagid),tid)
+    r.set('t:'+str(tid),msgpack.packb(thread_header))
+    return (True,tid)
+
+def generate_id():
+    return int(os.urandom(4).encode('hex'),16) / 2
+
+
+def generate_state():
+    return os.urandom(16).encode('hex')
+
+
+def register_user(username,password):
+    """
+    register returns (userid,state)
+    """
+    # check if user exists
+    r = redis.Redis()
+    if (r.get('u:'+username)):
+        return (False,'User exists')
+    # create user
+    uid = generate_id()
+    state = generate_state()
+
+    r.set('u:'+username,uid)
+    r.set('u:'+str(uid),username)
+    r.set('u:pass:'+str(uid),password)
+    r.set('u:time:'+str(uid),int(time()))
+    
+    r.set('u:auth:'+str(uid),state)
+    r.set('auth:'+state,uid)
+    
+    return (True,(uid,state))
+
+
+def login(username,password):
+    """
+    Login returns (userid,state)
+    """
+    r = redis.Redis()
+    uid = r.get('u:'+username)
+    if uid == None:
+        return (False,'Wrong username or password')
+    if r.get('u:pass'+str(uid)) != password:
+        return (False,'Wrong username or password')
+    state = r.get('u:auth:'+str(uid))
+    if state == None:
+        state = generate_state()
+        r.set('u:auth:'+str(uid),state)
+        r.set('auth:'+state,uid)
+    return (True,(uid,state))
+
+
+def validate_state(uid,state):
+    """
+    checks if given user id and state pair is correct
+    """
+    r = redis.Redis()
+    uid_ = r.get('auth:'+state)
+    state_ = r.get('u:auth:'+str(uid))
+    if uid_ == None:
+        return False
+    return int(uid_) == int(uid) and state == state_
+    
+
+def get_user_info(uid):
+    """
+    given user id returns (username,state)
+    """
+    r = redis.Redis()
+    return (r.get('u:'+str(uid)),r.get('u:auth:'+str(uid)))

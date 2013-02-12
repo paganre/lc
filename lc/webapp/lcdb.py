@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from webapp.models import Thread,Comment,Tag,Domain,LcUser
 from django.core.cache import cache
 from time import time
@@ -7,43 +8,70 @@ import traceback
 from webapp import alfred
 
 
-# NOT TESTED ---
 def get_active_ids():
     """
     returns a list of all active IDs
-    IDs are obtained from Redis via get('act:id')
+    IDs are obtained from Redis via get('act:ids')
     """
     r = redis.Redis()
     pipe = r.pipeline()
     pipe.get('act:ids')
     results = pipe.execute()
     try:
-        active_ids = msgpack.unpackb(results[0])
+        active_ids = msgpack.unpackb(results[0],use_list = 1)
         return active_ids
     except:
         return []
 
-# NOT TESTED ---
-def filter_tags(tagid,tids):
+
+def get_thread_ids_with_tag(tagid):
     """
-    Given tag id and list of active thread IDs,
-    Returns a new list of thread IDs that has the given tag
+    returns a list of active thread ids tagged with tagid 
     """
     r = redis.Redis()
-    pipe = r.pipeline()
-    for tid in tids:
-        pipe.lrange('t:tags:'+str(tid),0,-1)
-    tags = pipe.execute()
-    tag_filtered_ids = []
-    for i,tid in enumerate(tids):
-        for tag in tags[i]:
-            if tagid == tag:
-                tag_filtered_ids = tag_filtered_ids + [tid]
-                break
+    tids = r.lrange('tags:t:'+str(tagid),0,-1)
+    return [int(tid) for tid in tids]
 
-def get_tags(tag_ids):
+
+def get_tags_by_name(tag_names):
     """
-    returns tagid,name pairs for given tag_ids - caches the results
+    returns {'tag:<tagname>':<tagid>} dict
+    """
+    try:
+        # check cache
+        tags = cache.get_many(['tag:'+str(tag_name) for tag_name in tag_names])
+        for tag_name in tag_names:
+            if 'tag:'+str(tag_name) not in tags:
+                # cahce miss
+                try:
+                    tag = Tag.objects.get(name = tag_name)
+                    # cache result
+                    cache.set('tag:'+tag.name,tag.id)
+                    cache.set('tag:'+str(tag.id),tag.name)
+                    tags['tag:'+str(tag_name)] = tag.id
+                except ObjectDoesNotExist:
+                    # tag does not exist
+                    continue
+        return tags
+    except:
+        print traceback.format_exc()
+        return []
+
+def add_tag_to_thread(tid,tag_name):
+    """
+    tags the given thread with given tag - creates tag if necessary
+    """
+    try:
+        if tid not in get_active_ids():
+            return (False,'Thread not active')
+        tag_result = get_tags_by_name([tag_name])
+        if len(tag_result) == 0:
+            # tag does not exist - create it
+            
+    
+def get_tags_by_id(tag_ids):
+    """
+    returns {'tag:<tagid>':<tagname>} dict
     """
     try:
         # check cache
@@ -51,21 +79,20 @@ def get_tags(tag_ids):
         for tagid in tag_ids:
             if 'tag:'+str(tagid) not in tags:
                 # cache miss
-                tag = Tag.objects.get(pk = tagid)
-                tdict = {
-                    'id':tag.id,
-                    'name':tag.name
-                    }
-                # cache result
-                cache.set('tag:'+str(tagid),msgpack.packb(tdict))
-                tags['tag:'+str(tagid)] = tdict
-            else:
-                # cache hit - unpack
-                tags['tag:'+str(tagid)] = msgpack.unpackb(tags['tag:'+str(tagid)])
+                try:
+                    tag = Tag.objects.get(pk = tagid)
+                    # cache result
+                    cache.set('tag:'+str(tag.id),tag.name)
+                    cache.set('tag:'+tag.name,tag.id)
+                    tags['tag:'+str(tagid)] = tag.name
+                except ObjectDoesNotExist:
+                    # tag does not exist
+                    continue
         return tags
     except:
         print traceback.format_exc()
         return []
+
 
 def get_thread_headers(tids):
     """
@@ -92,22 +119,26 @@ def get_thread_headers(tids):
             # get cache misses from db and cache them
             if 't:head:'+str(tid) not in headers:
                 # cache miss
-                t = Thread.objects.get(pk = tid)
-                tdict = {
-                    'id':t.id,
-                    'url':t.url,
-                    'title':t.title,
-                    'summary':t.summary,
-                    'domain':t.domain.name,
-                    'cname':t.creator.user.username,
-                    'cid':t.creator.id,
-                    'time':t.time_created
-                    }
-                cache.set('t:head:'+str(tid),msgpack.packb(tdict))
-                headers['t:head:'+str(tid)] = tdict
+                try:
+                    t = Thread.objects.get(pk = tid)
+                    tdict = {
+                        'id':t.id,
+                        'url':t.url,
+                        'title':t.title,
+                        'summary':t.summary,
+                        'domain':t.domain.name,
+                        'cname':t.creator.user.username,
+                        'cid':t.creator.id,
+                        'time':t.time_created
+                        }
+                    cache.set('t:head:'+str(tid),msgpack.packb(tdict))
+                    headers['t:head:'+str(tid)] = tdict
+                except ObjectDoesNotExist:
+                    # thread does not exist
+                    continue
             else:
                 headers['t:head:'+str(tid)] = msgpack.unpackb(headers['t:head:'+str(tid)]) #unpack the result obtain from cache
-            headers['t:head:'+str(tid)]['tags'] = get_tags(results[i*4]) # list of tag names
+            headers['t:head:'+str(tid)]['tags'] = get_tags_by_id(results[i*4]) # list of tag names
             headers['t:head:'+str(tid)]['numcom'] = results[i*4+1]
             if results[i*4+2] == None:
                 results[i*4+2] = 0
