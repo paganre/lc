@@ -495,13 +495,6 @@ def login(request):
         else:
             return HttpResponse(json.dumps({'result':-1,'error':res[1]}))
     return HttpResponse(json.dumps({'result':-1,'error':'Fields not set'}))
-
-def stt(request):
-    unum = LcUser.objects.all().count()
-    tnum = Thread.objects.all().count()
-    cnum = Comment.objects.all().count()
-    res = "U: " + str(unum) + " T: " + str(tnum) + " C: " + str(cnum)
-    return HttpResponse(res)
         
 
 def logoutUser(request):

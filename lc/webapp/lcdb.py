@@ -4,7 +4,42 @@ from time import time
 import redis
 import msgpack
 import traceback
+from webapp import alfred
 
+
+# NOT TESTED ---
+def get_active_ids():
+    """
+    returns a list of all active IDs
+    IDs are obtained from Redis via get('act:id')
+    """
+    r = redis.Redis()
+    pipe = r.pipeline()
+    pipe.get('act:ids')
+    results = pipe.execute()
+    try:
+        active_ids = msgpack.unpackb(results[0])
+        return active_ids
+    except:
+        return []
+
+# NOT TESTED ---
+def filter_tags(tagid,tids):
+    """
+    Given tag id and list of active thread IDs,
+    Returns a new list of thread IDs that has the given tag
+    """
+    r = redis.Redis()
+    pipe = r.pipeline()
+    for tid in tids:
+        pipe.lrange('t:tags:'+str(tid),0,-1)
+    tags = pipe.execute()
+    tag_filtered_ids = []
+    for i,tid in enumerate(tids):
+        for tag in tags[i]:
+            if tagid == tag:
+                tag_filtered_ids = tag_filtered_ids + [tid]
+                break
 
 def get_tags(tag_ids):
     """
