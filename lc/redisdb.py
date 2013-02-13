@@ -55,6 +55,11 @@ def get_thread_ids(page = 0, algoritm = False):
     return r.lrange('act:ids',page*THREAD_PER_PAGE, (page+1)*THREAD_PER_PAGE-1)
 
 
+def get_all_threads():
+    r = redis.Redis()
+    return r.lrange('act:ids',0,-1)
+
+
 def get_user_comments(uid):
     r = redis.Redis()
     return [int(cid) for cid in r.lrange('u:comm:'+str(uid))]
