@@ -45,6 +45,7 @@ THREAD_PER_PAGE = 25
 LCDB = 1
 
 
+# tested
 def get_thread_ids(page = 0, algorithm = False):
     """
     thread id pagination, if algo = False returns time-sorted
@@ -55,16 +56,19 @@ def get_thread_ids(page = 0, algorithm = False):
     return [int(tid) for tid in r.lrange('act:ids',page*THREAD_PER_PAGE, (page+1)*THREAD_PER_PAGE-1)]
 
 
+# tested
 def get_all_threads():
     r = redis.Redis(db=LCDB)
     return [int(tid) for tid in r.lrange('act:ids',0,-1)]
 
 
+# tested
 def get_user_comments(uid):
     r = redis.Redis(db=LCDB)
     return [int(cid) for cid in r.lrange('u:comm:'+str(uid),0,-1)]
 
 
+# tested
 def get_user_follows(uid):
     """
     gets user's followed threads
@@ -73,16 +77,19 @@ def get_user_follows(uid):
     return [int(tid) for tid in r.smembers('u:foll:'+str(uid))]
 
 
+# tested
 def get_user_notif_count(uid):
     r = redis.Redis(db=LCDB)
     return r.zcard('u:notif:'+str(uid))
 
 
+# tested
 def get_user_notifs(uid):
     r = redis.Redis(db=LCDB)
     return [msgpack.unpackb(notif) for notif in r.zrange('u:notif:'+str(uid),0,-1)]
 
 
+# tested
 def get_user_notifs_after(uid,time):
     """
     gets notifications created after <time>
@@ -105,6 +112,7 @@ def delete_all_notifs(uid):
     r.delete('u:notif:'+str(uid))
 
 
+# tested
 def follow_thread(uid,tid,follow):
     r = redis.Redis(db=LCDB)
     if not follow:
@@ -115,11 +123,13 @@ def follow_thread(uid,tid,follow):
         r.sadd('t:foll:'+str(tid),str(uid))
 
 
+# tested
 def is_following(uid,tids):
     r = redis.Redis(db=LCDB)
     return [r.sismember('u:foll:'+str(uid),str(tid)) for tid in tids]
 
 
+# tested
 def vote(uid,cid,vote):
     r = redis.Redis(db=LCDB)
     if r.sismember('u:up:'+str(uid),str(cid)):
@@ -142,6 +152,7 @@ def vote(uid,cid,vote):
         r.incr('c:down:'+str(cid))
 
 
+# tested
 def did_vote(uid,cids):
     """
     returns a list of 0:not-voted, 1:up-voted, -1:down-voted for given comment_ids and user_id
@@ -158,6 +169,7 @@ def did_vote(uid,cids):
     return votes
 
 
+# tested
 def add_comment(tid,cid,text,parent=-1):
     """
     adds given comment to thread - notifies the followers and the parent commentor - returns comment_id
@@ -168,10 +180,9 @@ def add_comment(tid,cid,text,parent=-1):
         return (False,'Creator does not exist')
     parent_comment = None
     if parent != -1:
-        parent_comment = get_comments([parent])
-        if len(parent_comment) == 0:
+        parent_comment = get_comments([parent])[0]
+        if parent_comment == None:
             return (False,'Parent comment does not exist')
-        parent_comment = parent_comment[0]
 
     comment_id = generate_id()
     timestamp = int(time())
@@ -208,6 +219,16 @@ def add_comment(tid,cid,text,parent=-1):
     return (True,comment_id)
 
 
+# tested
+def get_thread_comments(tid):
+    """
+    returns the comment ids of a given thread
+    """
+    r = redis.Redis(db = LCDB)
+    return [int(cid) for cid in r.lrange('t:comm:'+str(tid),0,-1)]
+
+
+# tested
 def get_comments(cids):
     """
     returns comments with ids [cids] adds total up and down-votes on the fly
@@ -234,6 +255,7 @@ def get_comments(cids):
     return comments
 
 
+# tested
 def get_thread_headers(tids):
     """
     returns threads with ids [tids] adds the tags on the fly as a list of dict [{'id':<tagid>,'name':<tagname>}]
@@ -255,6 +277,7 @@ def get_thread_headers(tids):
     return headers
 
 
+# tested
 def get_tags():
     """
     returns all available tags sorted by number of usages [(id,name,usage)]
@@ -272,6 +295,16 @@ def get_tags():
     return out
 
 
+# tested
+def get_threads_with_tag(tagid):
+    """
+    returns the threads tagged with given tag
+    """
+    r = redis.Redis(db = LCDB)
+    return [int(tid) for tid in r.lrange('tag:t:'+str(tagid),0,-1)]
+
+
+# tested
 def get_tags_by_id(tagids):
     """
     given list of tag ids - returns tag names
@@ -280,6 +313,7 @@ def get_tags_by_id(tagids):
     return [r.get('tag:'+str(tagid)) for tagid in tagids]
 
 
+# tested
 def get_tags_by_name(tagnames):
     """
     given list of tag names return tag ids - creates tags if necessary
@@ -297,13 +331,14 @@ def get_tags_by_name(tagnames):
     return tagids
 
 
+# tested
 def add_tags(tid,tags):
     """
     tags the thread with given tagids
     """
     r = redis.Redis(db = LCDB)
     for tagid in tags:
-        r.lpush('tags:t:'+str(tagid),tid)
+        r.lpush('tag:t:'+str(tagid),tid)
         r.lpush('t:tags:'+str(tid),tagid)
 
 
@@ -333,10 +368,12 @@ def create_thread(title,url,domain,cid,tags=[],summary=''):
     return (True,tid)
 
 
+# tested
 def generate_id():
     return int(os.urandom(4).encode('hex'),16) / 2
 
 
+# tested
 def swap_user_info(u):
     """
     given user id returns username or vice versa
