@@ -65,7 +65,7 @@ def get_user_follows(uid):
     gets user's followed threads
     """
     r = redis.Redis()
-    return [int(tid) for tid in r.lrange('u:foll:'+str(uid))]
+    return [int(tid) for tid in r.smembers('u:foll:'+str(uid))]
 
 
 def get_user_notif_count(uid):
@@ -128,7 +128,7 @@ def vote(uid,cid,vote):
             return
         else:
             r.srem('u:down:'+str(uid),str(cid))
-            r.dec('c:down:'+str(cid))
+            r.decr('c:down:'+str(cid))
     if vote == 1:
         r.sadd('u:up:'+str(uid),cid)
         r.incr('c:up:'+str(cid))
@@ -196,7 +196,7 @@ def add_comment(tid,cid,text,parent=-1):
         'cid':cid,
         'type':0
         }
-    for follower in r.lrange('t:foll:'+str(tid)):
+    for follower in r.smembers('t:foll:'+str(tid)):
         if int(f) not in notified:
             notified.append(int(f))
             r.zadd('u:notif:'+str(f),msgpack.packb(notification),timestamp)
@@ -248,6 +248,21 @@ def get_thread_headers(tids):
                 tag_dicts.append({'id':tagid,'name':r.get('tag:'+str(tagid))})
             headers[ind]['tags'] = tag_dicts
     return headers
+
+
+def get_tags():
+    """
+    returns all available tags sorted by number of usages [(id,name,usage)]
+    """
+    r = redis.Redis()
+    tags = r.keys('tag:t:*')
+    out = []
+    for t in tags:
+        tagid = int(t.split(':')[2])
+        tagname = r.get('tag:'+str(tagid))
+        num_used = r.llen(t)
+        out.append(tagid,tagname,num_used)
+    return out
 
 
 def get_tags_by_id(tagids):

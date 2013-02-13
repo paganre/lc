@@ -33,15 +33,72 @@ Redis Structures:
   u:pass:<uid>     user's password
   u:time:<uid>     user's time of join
   u:foll:<uid>     set of thread-id's that user is following
-  u:notif:<uid>    list of notifications for user (see: aux-structures)  
+  u:notif:<uid>    sorted-set of notifications for user with score = timestamp (see: aux-structures)  
 
 Aux Structures:
 ---------------
  thread-header: {title,summary,url,domain,time,cid,cname}
  comment: {text,time,pid,cid,cname} [pid is parent id it's either -1 or a comment id]
- notification: {tid,cid,time,type} [type is either 1 (reply) or 0 (follow-notif)]
+ notification: {tid,cid,type} [type is either 1 (reply) or 0 (follow-notif)]
 
 """
+
+THREAD_PER_PAGE = 25
+
+def get_thread_ids(page = 0, algoritm = False):
+    """
+    thread id pagination, if algo = False returns time-sorted
+    """
+    r = redis.Redis()
+    if algorithm:
+        return r.lrange('act:sorted:ids',page*THREAD_PER_PAGE, (page+1)*THREAD_PER_PAGE -1)
+    return r.lrange('act:ids',page*THREAD_PER_PAGE, (page+1)*THREAD_PER_PAGE-1)
+
+
+def get_user_comments(uid):
+    r = redis.Redis()
+    return [int(cid) for cid in r.lrange('u:comm:'+str(uid))]
+
+
+def get_user_follows(uid):
+    """
+    gets user's followed threads
+    """
+    r = redis.Redis()
+    return [int(tid) for tid in r.lrange('u:foll:'+str(uid))]
+
+
+def get_user_notif_count(uid):
+    r = redis.Redis()
+    return r.zcard('u:notif:'+str(uid))
+
+
+def get_user_notifs(uid):
+    r = redis.Redis()
+    return [msgpack.unpackb(notif) for notif in r.zrange('u:notif:'+str(uid),0,-1)]
+
+
+def get_user_notifs_after(uid,time):
+    """
+    gets notifications created after <time>
+    """
+    r = redis.Redis()
+    return [msgpack.unpackb(notif) for notif in r.zrange('u:notif:'+str(uid),int(time),-1)]
+
+
+def delete_notifs(uid,times):
+    """
+    deletes notifs with given <times> timestamps
+    """
+    r = redis.Redis()
+    for time in times:
+        r.zremrange('u:notif:'+str(uid),int(time),int(time))
+
+
+def delete_all_notifs(uid):
+    r = redis.Redis()
+    r.delete('u:notif:'+str(uid))
+
 
 def follow_thread(uid,tid,follow):
     r = redis.Redis()
@@ -112,9 +169,10 @@ def add_comment(tid,cid,text,parent=-1):
         parent_comment = parent_comment[0]
 
     comment_id = generate_id()
+    timestamp = int(time())
     comment_dict = {
         'text':text,
-        'time':int(time()),
+        'time':timestamp,
         'pid':parent,
         'cid':cid,
         'cname':cname
@@ -130,20 +188,18 @@ def add_comment(tid,cid,text,parent=-1):
             reply_notification = {
                 'tid':tid,
                 'cid':cid,
-                'time':int(time()),
                 'type':1
                 }
-            r.lpush('u:notif:'+str(parent_creator),msgpack.packb(reply_notification))
+            r.zadd('u:notif:'+str(parent_creator),msgpack.packb(reply_notification),timestamp)
     notification = {
         'tid':tid,
         'cid':cid,
-        'time':int(time()),
         'type':0
         }
     for follower in r.lrange('t:foll:'+str(tid)):
         if int(f) not in notified:
             notified.append(int(f))
-            r.lpush('u:notif:'+str(f),msgpack.packb(notification))
+            r.zadd('u:notif:'+str(f),msgpack.packb(notification),timestamp)
     return (True,comment_id)
 
 
@@ -192,6 +248,21 @@ def get_thread_headers(tids):
                 tag_dicts.append({'id':tagid,'name':r.get('tag:'+str(tagid))})
             headers[ind]['tags'] = tag_dicts
     return headers
+
+
+def get_tags():
+    """
+    returns all available tags sorted by number of usages [(id,name,usage)]
+    """
+    r = redis.Redis()
+    tags = r.keys('tag:t:*')
+    out = []
+    for t in tags:
+        tagid = int(t.split(':')[2])
+        tagname = r.get('tag:'+str(tagid))
+        num_used = r.llen(t)
+        out.append(tagid,tagname,num_used)
+    return out
 
 
 def get_tags_by_id(tagids):
