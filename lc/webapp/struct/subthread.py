@@ -1,5 +1,3 @@
-from webapp.models import Comment
-
 class Subthread:
     def __init__(self,comment,children=[]):
         self.comment = comment
@@ -9,7 +7,7 @@ class Subthread:
         self.children.append(child)
 
     def insertChildTo(self,id,child):
-        if(id == self.comment.id):
+        if(id == self.comment['id']):
             self.children.append(child)
             return True
         else:
@@ -25,5 +23,5 @@ class Subthread:
         return list
 
     def __str__(self):
-        return str((self.comment.id,[str(child) for child in self.children]))
+        return str((self.comment['id'],[str(child) for child in self.children]))
 

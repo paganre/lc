@@ -23,7 +23,7 @@ from webapp import alfred
 from django.http import Http404
 from webapp.pretty_time import pretty_time
 from webapp import redisdb as db
-
+from webapp.struct.subthread import Subthread
 
 # Common site request forgery protection risk
 # Request is obtained from the login.html via POST
@@ -37,7 +37,7 @@ def cus(request):
 @csrf_protect
 def get_tag(request,tagid):
     if not mario.check_ip(request):
-        HttpResponseRedirect("/cus")
+        return HttpResponseRedirect("/cus")
     s = request.GET.get('s', '')
     if s == 'a':
         algorithm_works = True
@@ -197,54 +197,84 @@ def vote(request):
         return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
 
 
+# redis
 @csrf_protect
 def thread(request,tid):
     if not mario.check_ip(request):
-        HttpResponseRedirect("/cus")
+        return HttpResponseRedirect("/cus")
     try:
-        th = t.get_full_thread(int(tid))
-        if(th[0]):
-            # adjust </div> ranges
-            comments = []
-            votes = [0] * len(th[3])
-            uid = -1
-            if 'uid' in request.session:
-                uid = int(request.session['uid'])
-                res = u.did_vote(uid,th[3])
-                if res[0]:
-                    votes = res[1]
-                    
-            for subthread in th[2]:
-                sub = []
-                for i,c_ in enumerate(subthread):
-                    comment = c.comment_to_dict(c_[0])
-                    if 'uid' in request.session:
-                        ind = th[3].index(c_[0].id)
-                        if votes[ind] == 1:
-                            comment.update({'up':'up-voted'})
-                        elif votes[ind] == -1:
-                            comment.update({'down':'down-voted'})
-                    current_level = c_[1]
-                    if i == len(subthread)-1:
-                        sub.append([comment,range(current_level+1)])
-                    else:
-                        next_level = subthread[i+1][1]
-                        sub.append([comment,range(current_level - next_level +1)])
-                comments.append(sub)
-            
-            highlight = None
-            n = request.GET.get('not', '')
-            if n != '' and 'uid' in request.session:
-                u.del_notif(int(request.session['uid']),int(n))
-                highlight = int(n)
-                
-            t.increment_view_count(int(tid))
-            return render_to_response('thread.html',{"user": request.user,"uid":uid,"header":th[1],"threads":comments,"tid":tid,"highlight":highlight},context_instance=RequestContext(request))
+        header = db.get_thread_headers([int(tid)])[0]
+        if header == None:
+            raise Http404
+        # TODO: temp dict fix
+        if 'uid' in request.session:
+            header['following'] = db.is_following(int(request.session['uid']),[int(tid)])[0]
         else:
-            return HttpResponse(th[1])
-    except:
-        return HttpResponse(str(traceback.format_exc())+"th[2] is :"+str(th[2])+"\r\n\ i was:"+str(i))
+            header['following'] = False
+        header['time'] = pretty_time(int(header['time']))
+        header['creator_name'] = header['cname']
+        header['creator_id'] = header['cid']
 
+        cids = db.get_thread_comments(int(tid))
+        cids.reverse()
+        comments = db.get_comments(cids)
+        votes = [0]*len(cids)
+        if 'uid' in request.session:
+            uid = int(request.session['uid'])
+            votes = db.did_vote(uid,cids)
+
+        # create subthread trees
+        subs = []
+        for ind,c in enumerate(comments):
+            # TODO: temp dict fix
+            c['creator_name'] = c['cname']
+            c['creator_id'] = c['cid']
+            c['net_vote'] = c['up'] - c['down']
+            c['id'] = cids[ind]
+            c['time'] = pretty_time(c['time'])
+
+            if c['pid'] == -1:
+                subs.append(Subthread(c,[]))
+            else:
+                for s in subs:
+                    if s.insertChildTo(c['pid'],Subthread(c,[])):
+                        break
+        # convert subthread trees to lists
+        comment_threads = []
+        for s in subs:
+            comment_threads.append(s.toList(0,[]))
+        
+        rcomments = []
+        for subthread in comment_threads:
+            sub = []
+            for i,c_ in enumerate(subthread):
+                comment = c_[0]
+                if 'uid' in request.session:
+                    ind = cids.index(comment['id'])
+                    if votes[ind] == 1:
+                        comment.update({'up':'up-voted'})
+                    elif votes[ind] == -1:
+                        comment.update({'down':'down-voted'})
+                current_level = c_[1]
+                if i == len(subthread)-1:
+                    sub.append([comment,range(current_level+1)])
+                else:
+                    next_level = subthread[i+1][1]
+                    sub.append([comment,range(current_level - next_level +1)])
+            rcomments.append(sub)
+
+        highlight = None
+        #n = request.GET.get('not', '')
+        #if n != '' and 'uid' in request.session:
+        #    u.del_notif(int(request.session['uid']),int(n))
+        #    highlight = int(n)
+
+        #t.increment_view_count(int(tid))
+        return render_to_response('thread.html',{"user": request.user,"uid":uid,"header":header,"threads":rcomments,"tid":tid,"highlight":highlight},context_instance=RequestContext(request))
+    except:
+        return HttpResponse(str(traceback.format_exc()))
+
+       
 @csrf_protect
 def userpage(request,uid):
     if not mario.check_ip(request):
@@ -270,6 +300,7 @@ def userpage(request,uid):
     else:
         return HttpResponseRedirect("/")
 
+# changed to redis
 @csrf_protect
 def retrieve(request):
     """
@@ -283,12 +314,17 @@ def retrieve(request):
         type = request.POST.get('type','')
         if type == 'comment':
             cid = int(request.POST.get('id',''))
-            out = c.get_comment(cid)
-            comment = None
-            if out[0]:
-                comment = out[1]
-            else:
-                return HttpResponse(json.dumps({'result':-1,'error':out[1]}))
+            comment = db.get_comments([cid])[0]
+            if comment == None:
+                return HttpResponse(json.dumps({'result':-1,'error':'No such comment'}))
+            
+            #TODO: temp fix for dict keys matching
+            comment['creator_name'] = comment['cname']
+            comment['creator_id'] = comment['cid']
+            comment['net_vote'] = comment['up'] - comment['down']
+            comment['id'] = cid
+            comment['time'] = pretty_time(comment['time'])
+
             context = {}
             context.update({'c':comment})
             page = request.POST.get('page','')
@@ -309,23 +345,21 @@ def retrieve(request):
     except:
         return HttpResponse(json.dumps({'result':-1,'error':str(traceback.format_exc())}))
              
-
+# changed to redis
 @csrf_protect
 def scribe(request):
     if not mario.check_ip(request):
-        HttpResponseRedirect("/cus")
+        return HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
         try:
             tid = int(request.POST.get('tid',''))
             text = request.POST.get('text','')
-            parent = request.POST.get('parent','')
-            if parent == '':
-                parent = -1
+            parent = int(request.POST.get('parent',-1))
             if(text.strip() == ''):
                 return HttpResponse(json.dumps({'result':-1,'text':'no text'}))
-            res = c.add_comment(int(request.session['uid']),tid,text,parent)
+            res = db.add_comment(tid,int(request.session['uid']),text,parent = parent) 
             if(res[0]):
                 return HttpResponse(json.dumps({'result':0,'id':res[1]}))
             else:
@@ -335,7 +369,7 @@ def scribe(request):
     else:
         return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
 
-
+# redis temp home
 @csrf_protect
 def home_redis(request):
     tids = db.get_thread_ids()
@@ -357,8 +391,9 @@ def home_redis(request):
 
 @csrf_protect
 def home(request):
+    return HttpResponse('Alp biseyler yapiyo bi saniye pampa')
     if not mario.check_ip(request):
-        HttpResponseRedirect("/cus")
+        return HttpResponseRedirect("/cus")
     s = request.GET.get('s','')
     if s == 'a':
         algorithm_works = True

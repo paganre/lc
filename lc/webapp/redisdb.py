@@ -212,7 +212,7 @@ def add_comment(tid,cid,text,parent=-1):
         'cid':cid,
         'type':0
         }
-    for follower in r.smembers('t:foll:'+str(tid)):
+    for f in r.smembers('t:foll:'+str(tid)):
         if int(f) not in notified:
             notified.append(int(f))
             r.zadd('u:notif:'+str(f),msgpack.packb(notification),timestamp)

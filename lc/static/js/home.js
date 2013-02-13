@@ -122,7 +122,7 @@ function sendQuickComment(id){
     $("#qclabel"+id).removeClass("dp-none");
     $("#qclabel"+id).html("yollaniyo...");
     $.ajax({
-            url: 'scribe/',
+            url: '/scribe/',
                 type: 'POST',
                 data: {'text':text,'tid':id},
                 success: function(response) {
@@ -147,7 +147,7 @@ function getNewComment(cid,tid){
 	has_panel = 0;
     }
     $.ajax({
-            url: 'retrieve/',
+            url: '/retrieve/',
                 type: 'POST',
                 data: {'type':'comment','page':'home','has_panel':has_panel,'id':cid,'tid':tid},
                 success: function(response) {
