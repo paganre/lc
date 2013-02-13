@@ -22,6 +22,8 @@ from django.template import Context
 from webapp import alfred
 from django.http import Http404
 from webapp.pretty_time import pretty_time
+from webapp import redisdb as db
+
 
 # Common site request forgery protection risk
 # Request is obtained from the login.html via POST
@@ -320,7 +322,7 @@ def scribe(request):
             text = request.POST.get('text','')
             parent = request.POST.get('parent','')
             if parent == '':
-                parent = None
+                parent = -1
             if(text.strip() == ''):
                 return HttpResponse(json.dumps({'result':-1,'text':'no text'}))
             res = c.add_comment(int(request.session['uid']),tid,text,parent)
@@ -332,6 +334,26 @@ def scribe(request):
             return HttpResponse(json.dumps({'result':-1,'error':str(traceback.format_exc())}))
     else:
         return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
+
+
+@csrf_protect
+def home_redis(request):
+    tids = db.get_thread_ids()
+    headers = db.get_thread_headers(tids)
+    uid = -1
+    if 'uid' in request.session:
+        uid = int(request.session['uid'])
+    following = db.is_following(uid,tids)
+    for ind,h in enumerate(headers):
+        h['comments'] = []
+        h['following'] = following[ind]
+        h['time'] = pretty_time(int(h['time']))
+        h['creator_name'] = h['cname']
+        h['creator_id'] = h['cid']
+        
+    return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":[],"algorithm_works":False},context_instance=RequestContext(request))
+
+
 
 @csrf_protect
 def home(request):

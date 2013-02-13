@@ -41,7 +41,7 @@ Aux Structures:
 """
 
 
-THREAD_PER_PAGE = 25
+THREAD_PER_PAGE = 10
 LCDB = 1
 
 
@@ -272,8 +272,10 @@ def get_thread_headers(tids):
             tags = r.lrange('t:tags:'+str(tid),0,-1)
             tag_dicts = []
             for tagid in tags:
-                tag_dicts.append({'id':tagid,'name':r.get('tag:'+str(tagid))})
+                tag_dicts.append((tagid,r.get('tag:'+str(tagid))))
             headers[ind]['tags'] = tag_dicts
+            headers[ind]['num_comment'] = r.llen('t:comm:'+str(tid))
+            headers[ind]['id'] = tid
     return headers
 
 

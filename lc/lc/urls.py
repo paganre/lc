@@ -20,6 +20,7 @@ urlpatterns = patterns('',
     url(r'^follow/$','webapp.views.follow'),
     url(r'^unfollow/$','webapp.views.unfollow'),
     url(r'^cus/$','webapp.views.cus'),
+    url(r'^rhome/$','webapp.views.home_redis'),
 )
 
 
