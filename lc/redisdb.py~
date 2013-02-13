@@ -43,6 +43,59 @@ Aux Structures:
 
 """
 
+def follow_thread(uid,tid,follow):
+    r = redis.Redis()
+    if not follow:
+        r.srem('u:foll:'+str(uid),str(tid))
+        r.srem('t:foll:'+str(tid),str(uid))
+    else:
+        r.sadd('u:foll:'+str(uid),str(tid))
+        r.sadd('t:foll:'+str(tid),str(uid))
+
+
+def is_following(uid,tids):
+    r = redis.Redis()
+    return [r.sismember('u:foll:'+str(uid),str(tid)) for tid in tids]
+
+
+def vote(uid,cid,vote):
+    r = redis.Redis()
+    if r.sismember('u:up:'str(uid),str(cid))
+        if vote == 1:
+            return
+        else:
+            r.srem('u:up:'+str(uid),str(cid))
+            r.decr('c:up:'+str(cid))
+    elif r.sismember('u:down:'+str(uid),str(cid)):
+        if vote == -1:
+            return
+        else:
+            r.srem('u:down:'+str(uid),str(cid))
+            r.dec('c:down:'+str(cid))
+    if vote == 1:
+        r.sadd('u:up:'+str(uid),cid)
+        r.incr('c:up:'+str(cid))
+    elif vote == -1:
+        r.sadd('u:down:'+str(uid),cid)
+        r.incr('c:down:'+str(cid))
+
+
+def did_vote(uid,cids):
+    """
+    returns a list of 0:not-voted, 1:up-voted, -1:down-voted for given comment_ids and user_id
+    """
+    r = redis.Redis()
+    votes = []
+    for cid in cids:
+        if r.sismember('u:up:'+str(uid),str(cid)):
+            votes.append(1)
+        elif r.sismember('u:down:'+str(uid),str(cid)):
+            votes.append(-1)
+        else:
+            votes.append(0)
+    return votes
+
+
 def add_comment(tid,cid,text,parent=-1):
     """
     adds given comment to thread - notifies the followers and the parent commentor - returns comment_id
@@ -96,7 +149,7 @@ def add_comment(tid,cid,text,parent=-1):
 
 def get_comments(cids):
     """
-    returns comments with ids [cids]
+    returns comments with ids [cids] adds total up and down-votes on the fly
     """
     r = redis.Redis()
     pipe = r.pipeline()
@@ -106,6 +159,17 @@ def get_comments(cids):
     for ind,c in enumerate(comments):
         if c != None:
             comments[ind] = msgpack.unpackb(c)
+            up = r.get('c:up:'+str(cids[ind]))
+            if up:
+                comments[ind]['up'] = int(up)
+            else:
+                comments[ind]['up'] = 0
+            down = r.get('c:down:'+str(cids[ind]))
+            if up:
+                comments[ind]['down'] = int(down)
+            else:
+                comments[ind]['down'] = 0
+ 
     return comments
 
 
@@ -130,20 +194,29 @@ def get_thread_headers(tids):
     return headers
 
 
-def get_tag_by_id(tagid):
+def get_tags_by_id(tagids):
+    """
+    given list of tag ids - returns tag names
+    """
     r = redis.Redis()
-    return r.get('tag:'+str(tagid))
+    return [r.get('tag:'+str(tagid)) for tagid in tagids]
 
 
-def get_tag_by_name(tagname):
+def get_tags_by_name(tagnames):
+    """
+    given list of tag names return tag ids - creates tags if necessary
+    """
     r = redis.Redis()
-    tagid = r.get('tag:'+str(tagname))
-    if tagid == None:
-        # create tag here
-        tagid = generate_id()
-        r.set('tag:'+str(tagname),tagid)
-        r.set('tag:'+str(tagid),tagname)
-    return tagid
+    tagids = [] 
+    for tagname in tagnames:
+        tagid = r.get('tag:'+str(tagname))
+        if tagid == None:
+            # create tag here
+            tagid = generate_id()
+            r.set('tag:'+str(tagname),tagid)
+            r.set('tag:'+str(tagid),tagname)
+        tagids.append(tagid)
+    return tagids
 
 
 def add_tags(tid,tags):
