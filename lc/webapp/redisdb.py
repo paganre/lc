@@ -34,7 +34,7 @@ Redis Structures:
 
 Aux Structures:
 ---------------
- thread-header: {title,summary,url,domain,time,cid,cname}
+ thread-header: {title,summary,url,domain,time,cid,cname,up,down,views}
  comment: {text,time,pid,cid,cname} [pid is parent id it's either -1 or a comment id]
  notification: {tid,cid,type} [type is either 1 (reply) or 0 (follow-notif)]
 

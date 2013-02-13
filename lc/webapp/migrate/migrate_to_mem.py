@@ -26,7 +26,11 @@ def migrate_threads_to_redis():
             'domain':t.domain.name,
             'time':t.time_created,
             'cid':t.creator.id,
-            'cname':t.creator.user.username
+            'cname':t.creator.user.username,
+            # We need these fields for sorting algorithm
+            'up':t.up,
+            'down':t.down,
+            'views':t.views,
             }
         r.set('t:'+str(t.id),msgpack.packb(tdict))
         for tag in t.tag_set.all():

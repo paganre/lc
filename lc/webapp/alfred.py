@@ -7,31 +7,34 @@ from time import time
 import redis
 import msgpack
 
+LCDB = 1
+
 
 def sort_threads():
     """
     returns algorithm sorted threads (re-renders the list if necessary)
     """
     try:
-        r = redis.Redis()
+        r = redis.Redis(db = LCDB)
         # check if sorting is necessary
         if r.get('sorted:recently') == None:
-            ids = msgpack.unpackb(r.get('act:ids'),use_list = 1) # retrieved act-ids
+            ids = r.lrange('act:ids',0,-1) # retrieved act-ids
             pipe = r.pipeline()
             for id in ids:
-                pipe.hgetall('t:'+str(id))
+                pipe.get('t:'+str(id))
             stats = pipe.execute()
             out = []
             for ind,id in enumerate(ids):
-                stat = stats[ind]
-                out.append((id,contro(int(stat['up']),int(stat['down']), int(stat['view']), int(stat['time']))))
+                stat = msgpack.unpackb(stats[ind])
+                out.append((id,contro(int(stat['up']),int(stat['down']), int(stat['views']), int(stat['time']))))
             out.sort(key=lambda l: l[1], reverse=True)
             sorted_ids = [o[0] for o in out]
-            r.set('act:sorted:ids',msgpack.packb(sorted_ids))
+            for s in sorted_ids:
+                r.lpush('act:sorted:ids',s)
             r.setex('sorted:recently',1,120)
             return (True,sorted_ids) # sorted
         else:
-            out = msgpack.unpackb(r.get('act:sorted:ids'),use_list=1)
+            out = r.lrange('act:sorted:ids',0,-1)
             return (True,out) # no sorting
     except:
         return (False,str(traceback.format_exc()))
