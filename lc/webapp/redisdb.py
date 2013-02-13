@@ -7,28 +7,28 @@ from time import time
 Redis Structures:
 -----------------
  Thread-Lists:
-  act:ids          list of active ids in a time-sorted manner
+  .act:ids          list of active ids in a time-sorted manner
   act:sorted:ids   list of active ids in an algorithm-sorted manner
  Threads:
-  t:<tid>          msgpacked thread-header of thread (see: aux-structures)
-  t:tags:<tid>     list of tag-ids for thread
-  t:comm:<tid>     list of comment-ids for thread in a time-sorted manner
+  .t:<tid>          msgpacked thread-header of thread (see: aux-structures)
+  .t:tags:<tid>     list of tag-ids for thread
+  .t:comm:<tid>     list of comment-ids for thread in a time-sorted manner
   t:foll:<tid>     set of followers of the thread
  Tags:
-  tag:<tagid>      name of the tag
-  tag:<tagname>    id of the tag
-  tag:t:<tagid>    thread list of the tags in a time-sorted manner
+  .tag:<tagid>      name of the tag
+  .tag:<tagname>    id of the tag
+  .tag:t:<tagid>    thread list of the tags in a time-sorted manner
  Comments:
-  c:<cid>          msgpacked comment (see:aux-structures)
+  .c:<cid>          msgpacked comment (see:aux-structures)
   c:up:<cid>       up-votes of comment
   c:down:<cid>     down-votes of comment
- Users:
-  u:<uid>          username of user
-  u:<uname>        id of user
-  u:comm:<uid>     comment-list of user
+ UsSSWers:
+  .u:<uid>          username of user
+  .u:<uname>        id of user
+  .u:comm:<uid>     comment-list of user
   u:up:<uid>       user's up-voted comment set
   u:down:<uid>     user's down-voted comment set
-  u:time:<uid>     user's time of join
+  .u:time:<uid>     user's time of join
   u:foll:<uid>     set of thread-id's that user is following
   u:notif:<uid>    sorted-set of notifications for user with score = timestamp (see: aux-structures)  
 
@@ -42,43 +42,44 @@ Aux Structures:
 
 
 THREAD_PER_PAGE = 25
+LCDB = 1
 
 
-def get_thread_ids(page = 0, algoritm = False):
+def get_thread_ids(page = 0, algorithm = False):
     """
     thread id pagination, if algo = False returns time-sorted
     """
-    r = redis.Redis()
+    r = redis.Redis(db=LCDB)
     if algorithm:
-        return r.lrange('act:sorted:ids',page*THREAD_PER_PAGE, (page+1)*THREAD_PER_PAGE -1)
-    return r.lrange('act:ids',page*THREAD_PER_PAGE, (page+1)*THREAD_PER_PAGE-1)
+        return [int(tid) for tid in r.lrange('act:sorted:ids',page*THREAD_PER_PAGE, (page+1)*THREAD_PER_PAGE -1)]
+    return [int(tid) for tid in r.lrange('act:ids',page*THREAD_PER_PAGE, (page+1)*THREAD_PER_PAGE-1)]
 
 
 def get_all_threads():
-    r = redis.Redis()
-    return r.lrange('act:ids',0,-1)
+    r = redis.Redis(db=LCDB)
+    return [int(tid) for tid in r.lrange('act:ids',0,-1)]
 
 
 def get_user_comments(uid):
-    r = redis.Redis()
-    return [int(cid) for cid in r.lrange('u:comm:'+str(uid))]
+    r = redis.Redis(db=LCDB)
+    return [int(cid) for cid in r.lrange('u:comm:'+str(uid),0,-1)]
 
 
 def get_user_follows(uid):
     """
     gets user's followed threads
     """
-    r = redis.Redis()
+    r = redis.Redis(db=LCDB)
     return [int(tid) for tid in r.smembers('u:foll:'+str(uid))]
 
 
 def get_user_notif_count(uid):
-    r = redis.Redis()
+    r = redis.Redis(db=LCDB)
     return r.zcard('u:notif:'+str(uid))
 
 
 def get_user_notifs(uid):
-    r = redis.Redis()
+    r = redis.Redis(db=LCDB)
     return [msgpack.unpackb(notif) for notif in r.zrange('u:notif:'+str(uid),0,-1)]
 
 
@@ -86,7 +87,7 @@ def get_user_notifs_after(uid,time):
     """
     gets notifications created after <time>
     """
-    r = redis.Redis()
+    r = redis.Redis(db=LCDB)
     return [msgpack.unpackb(notif) for notif in r.zrange('u:notif:'+str(uid),int(time),-1)]
 
 
@@ -94,18 +95,18 @@ def delete_notifs(uid,times):
     """
     deletes notifs with given <times> timestamps
     """
-    r = redis.Redis()
+    r = redis.Redis(db=LCDB)
     for time in times:
         r.zremrange('u:notif:'+str(uid),int(time),int(time))
 
 
 def delete_all_notifs(uid):
-    r = redis.Redis()
+    r = redis.Redis(db=LCDB)
     r.delete('u:notif:'+str(uid))
 
 
 def follow_thread(uid,tid,follow):
-    r = redis.Redis()
+    r = redis.Redis(db=LCDB)
     if not follow:
         r.srem('u:foll:'+str(uid),str(tid))
         r.srem('t:foll:'+str(tid),str(uid))
@@ -115,13 +116,13 @@ def follow_thread(uid,tid,follow):
 
 
 def is_following(uid,tids):
-    r = redis.Redis()
+    r = redis.Redis(db=LCDB)
     return [r.sismember('u:foll:'+str(uid),str(tid)) for tid in tids]
 
 
 def vote(uid,cid,vote):
-    r = redis.Redis()
-    if r.sismember('u:up:'str(uid),str(cid))
+    r = redis.Redis(db=LCDB)
+    if r.sismember('u:up:'+str(uid),str(cid)):
         if vote == 1:
             return
         else:
@@ -145,7 +146,7 @@ def did_vote(uid,cids):
     """
     returns a list of 0:not-voted, 1:up-voted, -1:down-voted for given comment_ids and user_id
     """
-    r = redis.Redis()
+    r = redis.Redis(db=LCDB)
     votes = []
     for cid in cids:
         if r.sismember('u:up:'+str(uid),str(cid)):
@@ -161,7 +162,7 @@ def add_comment(tid,cid,text,parent=-1):
     """
     adds given comment to thread - notifies the followers and the parent commentor - returns comment_id
     """
-    r = redis.Redis()
+    r = redis.Redis(db=LCDB)
     cname = r.get('u:'+str(cid))
     if cname == None:
         return (False,'Creator does not exist')
@@ -211,7 +212,7 @@ def get_comments(cids):
     """
     returns comments with ids [cids] adds total up and down-votes on the fly
     """
-    r = redis.Redis()
+    r = redis.Redis(db = LCDB)
     pipe = r.pipeline()
     for cid in cids:
         pipe.get('c:'+str(cid))
@@ -237,7 +238,7 @@ def get_thread_headers(tids):
     """
     returns threads with ids [tids] adds the tags on the fly as a list of dict [{'id':<tagid>,'name':<tagname>}]
     """
-    r = redis.Redis()
+    r = redis.Redis(db = LCDB)
     pipe = r.pipeline()
     for tid in tids:
         pipe.get('t:'+str(tid))
@@ -258,14 +259,16 @@ def get_tags():
     """
     returns all available tags sorted by number of usages [(id,name,usage)]
     """
-    r = redis.Redis()
+    r = redis.Redis(db = LCDB)
     tags = r.keys('tag:t:*')
     out = []
     for t in tags:
         tagid = int(t.split(':')[2])
         tagname = r.get('tag:'+str(tagid))
         num_used = r.llen(t)
-        out.append(tagid,tagname,num_used)
+        out.append((tagid,tagname,num_used))
+    out = sorted(out, key = lambda x : x[2])
+    out.reverse()
     return out
 
 
@@ -273,7 +276,7 @@ def get_tags_by_id(tagids):
     """
     given list of tag ids - returns tag names
     """
-    r = redis.Redis()
+    r = redis.Redis(db = LCDB)
     return [r.get('tag:'+str(tagid)) for tagid in tagids]
 
 
@@ -281,7 +284,7 @@ def get_tags_by_name(tagnames):
     """
     given list of tag names return tag ids - creates tags if necessary
     """
-    r = redis.Redis()
+    r = redis.Redis(db = LCDB)
     tagids = [] 
     for tagname in tagnames:
         tagid = r.get('tag:'+str(tagname))
@@ -298,7 +301,7 @@ def add_tags(tid,tags):
     """
     tags the thread with given tagids
     """
-    r = redis.Redis()
+    r = redis.Redis(db = LCDB)
     for tagid in tags:
         r.lpush('tags:t:'+str(tagid),tid)
         r.lpush('t:tags:'+str(tid),tagid)
@@ -309,7 +312,7 @@ def create_thread(title,url,domain,cid,tags=[],summary=''):
     creates a thread and returns the thread id
     tags is a list of tag-ids, the tags should be created (if not existent) prior to calling this function
     """
-    r = redis.Redis()
+    r = redis.Redis(db = LCDB)
     cname = r.get('u:'+str(cid))
     if cname == None:
         return (False,'Creator not found')
@@ -334,9 +337,9 @@ def generate_id():
     return int(os.urandom(4).encode('hex'),16) / 2
 
 
-def get_user_name(uid):
+def swap_user_info(u):
     """
-    given user id returns username
+    given user id returns username or vice versa
     """
-    r = redis.Redis()
-    return r.get('u:'+str(uid))
+    r = redis.Redis(db = LCDB)
+    return r.get('u:'+str(u))
