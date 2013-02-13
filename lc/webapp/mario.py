@@ -2,6 +2,8 @@ from django.http import HttpRequest
 import redis
 from webapp import thread as t
 
+MARIODB = 2
+
 def is_ajax_post(request):
     return (request.is_ajax() and request.method == 'POST')
 
@@ -9,7 +11,7 @@ def is_ajax_get(request):
     return (request.is_ajax() and request.method == 'GET')
 
 def is_spam(tid):
-    r = redis.Redis(db = 1)
+    r = redis.Redis(db = MARIODB)
     res = t.get_thread_header(tid)
     # We will write a function in Mario to update the spamlist
     
@@ -27,7 +29,7 @@ def is_spam(tid):
     return False
 
 def is_ip_banned(request):
-    r = redis.Redis(db = 1)
+    r = redis.Redis(db = MARIODB)
     client_ip = get_client_ip(request)
     return r.exists('ipban:'+str(client_ip))
 
@@ -37,7 +39,7 @@ def is_username_banned(username):
 
 def check_registration_ip(request):
     # User can register at most 5 accounts in 5 minutes
-    r = redis.Redis(db = 1)
+    r = redis.Redis(db = MARIODB)
     client_ip = get_client_ip(request)
     if r.exists('ipreg:'+str(client_ip)):
         num = int(r.get('ipreg:'+str(client_ip)))

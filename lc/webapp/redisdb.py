@@ -13,23 +13,23 @@ Redis Structures:
   .t:<tid>          msgpacked thread-header of thread (see: aux-structures)
   .t:tags:<tid>     list of tag-ids for thread
   .t:comm:<tid>     list of comment-ids for thread in a time-sorted manner
-  t:foll:<tid>     set of followers of the thread
+  ..t:foll:<tid>     set of followers of the thread
  Tags:
   .tag:<tagid>      name of the tag
   .tag:<tagname>    id of the tag
   .tag:t:<tagid>    thread list of the tags in a time-sorted manner
  Comments:
   .c:<cid>          msgpacked comment (see:aux-structures)
-  c:up:<cid>       up-votes of comment
-  c:down:<cid>     down-votes of comment
- UsSSWers:
+  ..c:up:<cid>       up-votes of comment
+  ..c:down:<cid>     down-votes of comment
+ Users:
   .u:<uid>          username of user
   .u:<uname>        id of user
   .u:comm:<uid>     comment-list of user
-  u:up:<uid>       user's up-voted comment set
-  u:down:<uid>     user's down-voted comment set
+  ..u:up:<uid>       user's up-voted comment set
+  ..u:down:<uid>     user's down-voted comment set
   .u:time:<uid>     user's time of join
-  u:foll:<uid>     set of thread-id's that user is following
+  ..u:foll:<uid>     set of thread-id's that user is following
   u:notif:<uid>    sorted-set of notifications for user with score = timestamp (see: aux-structures)  
 
 Aux Structures:
