@@ -28,9 +28,6 @@ Redis Structures:
   u:comm:<uid>     comment-list of user
   u:up:<uid>       user's up-voted comment set
   u:down:<uid>     user's down-voted comment set
-  u:auth:<uid>     user's state token - expiry
-  auth:<state>     user id for given state token
-  u:pass:<uid>     user's password
   u:time:<uid>     user's time of join
   u:foll:<uid>     set of thread-id's that user is following
   u:notif:<uid>    sorted-set of notifications for user with score = timestamp (see: aux-structures)  
@@ -43,7 +40,9 @@ Aux Structures:
 
 """
 
+
 THREAD_PER_PAGE = 25
+
 
 def get_thread_ids(page = 0, algoritm = False):
     """
@@ -53,6 +52,11 @@ def get_thread_ids(page = 0, algoritm = False):
     if algorithm:
         return r.lrange('act:sorted:ids',page*THREAD_PER_PAGE, (page+1)*THREAD_PER_PAGE -1)
     return r.lrange('act:ids',page*THREAD_PER_PAGE, (page+1)*THREAD_PER_PAGE-1)
+
+
+def get_all_threads():
+    r = redis.Redis()
+    return r.lrange('act:ids',0,-1)
 
 
 def get_user_comments(uid):
@@ -325,70 +329,14 @@ def create_thread(title,url,domain,cid,tags=[],summary=''):
     r.set('t:'+str(tid),msgpack.packb(thread_header))
     return (True,tid)
 
+
 def generate_id():
     return int(os.urandom(4).encode('hex'),16) / 2
 
 
-def generate_state():
-    return os.urandom(16).encode('hex')
-
-
-def register_user(username,password):
+def get_user_name(uid):
     """
-    register returns (userid,state)
-    """
-    # check if user exists
-    r = redis.Redis()
-    if (r.get('u:'+username)):
-        return (False,'User exists')
-    # create user
-    uid = generate_id()
-    state = generate_state()
-
-    r.set('u:'+username,uid)
-    r.set('u:'+str(uid),username)
-    r.set('u:pass:'+str(uid),password)
-    r.set('u:time:'+str(uid),int(time()))
-    
-    r.set('u:auth:'+str(uid),state)
-    r.set('auth:'+state,uid)
-    
-    return (True,(uid,state))
-
-
-def login(username,password):
-    """
-    Login returns (userid,state)
+    given user id returns username
     """
     r = redis.Redis()
-    uid = r.get('u:'+username)
-    if uid == None:
-        return (False,'Wrong username or password')
-    if r.get('u:pass'+str(uid)) != password:
-        return (False,'Wrong username or password')
-    state = r.get('u:auth:'+str(uid))
-    if state == None:
-        state = generate_state()
-        r.set('u:auth:'+str(uid),state)
-        r.set('auth:'+state,uid)
-    return (True,(uid,state))
-
-
-def validate_state(uid,state):
-    """
-    checks if given user id and state pair is correct
-    """
-    r = redis.Redis()
-    uid_ = r.get('auth:'+state)
-    state_ = r.get('u:auth:'+str(uid))
-    if uid_ == None:
-        return False
-    return int(uid_) == int(uid) and state == state_
-    
-
-def get_user_info(uid):
-    """
-    given user id returns (username,state)
-    """
-    r = redis.Redis()
-    return (r.get('u:'+str(uid)),r.get('u:auth:'+str(uid)))
+    return r.get('u:'+str(uid))
