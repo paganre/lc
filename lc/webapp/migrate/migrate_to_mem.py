@@ -51,7 +51,8 @@ def migrate_threads_to_redis():
                 'time':comment.time_created,
                 'pid': pid,
                 'cid':comment.creator.id,
-                'cname':comment.creator.user.username
+                'cname':comment.creator.user.username,
+                'tid':t.id
             }
             r.set('c:'+str(comment.id),msgpack.packb(cdict))
 

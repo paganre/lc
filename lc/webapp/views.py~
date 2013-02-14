@@ -37,7 +37,7 @@ def cus(request):
 @csrf_protect
 def get_tag(request,tagid):
     if not mario.check_ip(request):
-        HttpResponseRedirect("/cus")
+        return HttpResponseRedirect("/cus")
     s = request.GET.get('s', '')
     if s == 'a':
         algorithm_works = True
@@ -105,10 +105,9 @@ def follow(request):
         try:
             uid = int(request.session['uid'])
             tid = int(request.POST.get('tid',-1))
-            if u.follow_thread(uid,tid):
-                return HttpResponse(json.dumps({'result':0}))
-            else:
-                return HttpResponse(json.dumps({'result':-1,'error':'user returned false'}))
+            if tid == -1:
+                return HttpResponse(json.dumps({'result':-1,'error':'No such thread'}))
+            db.
         except:
             return HttpResponse(json.dumps({'result':-1,'error':str(traceback.format_exc())}))
     else:

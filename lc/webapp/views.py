@@ -95,25 +95,27 @@ def tag(request):
     else:
         return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
 
+#redis
 @csrf_protect
 def follow(request):
     if not mario.check_ip(request):
-        HttpResponseRedirect("/cus")
+        return HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
         try:
             uid = int(request.session['uid'])
             tid = int(request.POST.get('tid',-1))
-            if u.follow_thread(uid,tid):
-                return HttpResponse(json.dumps({'result':0}))
-            else:
-                return HttpResponse(json.dumps({'result':-1,'error':'user returned false'}))
+            if tid == -1:
+                return HttpResponse(json.dumps({'result':-1,'error':'No such thread'}))
+            db.follow_thread(uid,tid,True)
+            return HttpResponse(json.dumps({'result':0}))
         except:
             return HttpResponse(json.dumps({'result':-1,'error':str(traceback.format_exc())}))
     else:
         return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
 
+#redis
 @csrf_protect
 def unfollow(request):
     if not mario.check_ip(request):
@@ -124,7 +126,9 @@ def unfollow(request):
         try:
             uid = int(request.session['uid'])
             tid = int(request.POST.get('tid',-1))
-            u.unfollow_thread(uid,tid)
+            if tid == -1:
+                return HttpResponse(json.dumps({'result':-1,'error':'No such thread'}))
+            db.follow_thread(uid,tid,False)
             return HttpResponse(json.dumps({'result':0}))
         except:
             return HttpResponse(json.dumps({'result':-1,'error':str(traceback.format_exc())}))
@@ -177,6 +181,7 @@ def notif(request):
         return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
 
 
+#redis
 @csrf_protect
 def vote(request):
     if not mario.check_ip(request):
@@ -185,11 +190,11 @@ def vote(request):
         return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated() and 'uid' in request.session:
         try:
-            cid = int(request.POST.get('cid',''))
-            vote = int(request.POST.get('vote',''))
-            out = u.vote(int(request.session['uid']),cid,vote)
-            if not out[0]:
-                return HttpResponse(json.dumps({'result':-1,'error':out[1]}))
+            cid = int(request.POST.get('cid',-1))
+            vote = int(request.POST.get('vote',0))
+            if cid == -1:
+                return HttpResponse(json.dumps({'result':-1,'error':'No such comment'}))
+            db.vote(int(request.session['uid']),cid,vote)
             return HttpResponse(json.dumps({'result':0}))
         except:
             return HttpResponse(json.dumps({'result':-1,'error':str(traceback.format_exc())}))
@@ -274,31 +279,49 @@ def thread(request,tid):
     except:
         return HttpResponse(str(traceback.format_exc()))
 
-       
+#redis
 @csrf_protect
 def userpage(request,uid):
     if not mario.check_ip(request):
         HttpResponseRedirect("/cus")
-    #if request.user.username==username and request.user.is_authenticated() and 'uid' in request.session:
-    #res = u.get_commented_threads(u.get_user_id(username))
-    res = u.get_commented_threads(int(uid))
-    if res[0]:
-        username = u.get_user_name(int(uid))
-        headers = []
-        for r in res[1]:
-            header = t.get_thread_header(r[0])
-            if header[0] and (not mario.is_spam(header[1]['id'])):
-                sub = []
-                for cid in r[1]:
-                    try:
-                        sub.append(Comment.objects.get(pk = int(cid)))
-                    except:
-                        connection._rollback()
-                    header[1]['comments'] = c.get_comment_fields(sub)
-                headers = headers + [header[1]]
-        return render_to_response('userpage.html',{"username":username,"user": request.user,"headers":headers},context_instance=RequestContext(request))
-    else:
-        return HttpResponseRedirect("/")
+
+    cids = db.get_user_comments(int(uid))[:15]
+    comments = db.get_comments(cids)
+    #TODO: temp fix for dict fields for comments / thread headers
+    for ind,comment in enumerate(comments):
+        comment['creator_name'] = comment['cname']
+        comment['creator_id'] = comment['cid']
+        comment['net_vote'] = comment['up'] - comment['down']
+        comment['id'] = cids[ind]
+        comment['time'] = pretty_time(comment['time'])
+
+    tids = [int(c['tid']) for c in comments]
+    tset = []
+    cset = []
+    headers = []
+    for ind,tid in enumerate(tids):
+        if tid in tset:
+            tind = tset.index(tid)
+            cset[tind].append(comments[ind])
+        else:
+            tset.append(tid)
+            cset.append([comments[ind]])
+            headers.append(db.get_thread_headers([tid])[0])
+
+    # tset - unique list of threads
+    # cset = [[comments]] : comment list for each thread
+    username = db.swap_user_info(int(uid))
+    for ind,header in enumerate(headers):
+        header['comments'] = cset[ind]
+        if 'uid' in request.session:
+            header['following'] = db.is_following(int(request.session['uid']),[int(tset[ind])])[0]
+        else:
+            header['following'] = False
+        header['time'] = pretty_time(int(header['time']))
+        header['creator_name'] = header['cname']
+        header['creator_id'] = header['cid']
+    return render_to_response('userpage.html',{"username":username,"user": request.user,"headers":headers},context_instance=RequestContext(request))
+    
 
 # changed to redis
 @csrf_protect
@@ -426,6 +449,7 @@ def home(request):
     
     return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":tags,"algorithm_works":algorithm_works},context_instance=RequestContext(request))
 
+
 @csrf_protect
 def submit(request):
     if not mario.check_ip(request):
@@ -438,7 +462,7 @@ def submit(request):
 @csrf_protect
 def link(request):
     if not mario.check_ip(request):
-        HttpResponseRedirect("/cus")
+        return HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
     if request.user and request.user.is_authenticated():
@@ -477,7 +501,7 @@ def create(request):
         HttpResponseRedirect("/cus")
     if not mario.is_ajax_post(request):
         return HttpResponseRedirect("/")
-    if request.user and request.user.is_authenticated():
+    if 'uid' in request.session and request.user and request.user.is_authenticated():
         link = request.POST.get('link','')
         title = request.POST.get('title','')
         summary = request.POST.get('summary','')
@@ -485,29 +509,14 @@ def create(request):
             summary = None
         suggested = request.POST.get('suggested','')
         domain_name = request.POST.get('domain','')
-        domain_name = domain_name[1:len(domain_name)-1] # strip parantheses
-        res = d.createnx_domain(domain_name)
-        domain = None
-        # check if domain is retrieved (or created) successfully - if not rollback
-        if(res[0]):
-            domain = res[0]
-        else:
-            return HttpResponse(json.dumps({'result':-1,'error':res[1]}))
-        # check if a thread with same domain and suggested title already exists
-        ds_res = t.check_domain_stitle(suggested, domain)
-        if(ds_res[0]==0):
-            # create thread
-            res = t.create_thread(int(request.session['uid']),title,summary,suggested,domain,link)
-            if(res[0]):
-                return HttpResponse(json.dumps({'result':0,'tid':str(res[1])}))
-            else:
-                return HttpResponse(json.dumps({'result':-1,'error':res[1]}))
-        else:
-            if(ds_res[0]==1):
-                # A thread with same domain name and suggested title exists
-                return HttpResponse(json.dumps({'result':-1,'error':'texists', 'tid':str(ds_res[1])}))
-            else:
-                return HttpResponse(json.dumps({'result':-1,'error':'DB error'}))
+        # check if not unique
+        uid = int(request.session['uid'])
+        tid = -1
+        try:
+            tid = db.create_thread(uid,title,summary,link,domain_name)
+        except:
+            return HttpResponse(json.dumps({'result':-1,'error':str(traceback.format_exc())}))
+        return HttpResponse(json.dumps({'result':0,'tid':tid}))
     else:
         return HttpResponse(json.dumps({'result':-1,'error':'not authed'}))
 

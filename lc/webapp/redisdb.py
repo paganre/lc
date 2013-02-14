@@ -35,7 +35,7 @@ Redis Structures:
 Aux Structures:
 ---------------
  thread-header: {title,summary,url,domain,time,cid,cname,up,down,views}
- comment: {text,time,pid,cid,cname} [pid is parent id it's either -1 or a comment id]
+ comment: {tid,text,time,pid,cid,cname} [pid is parent id it's either -1 or a comment id]
  notification: {tid,cid,type} [type is either 1 (reply) or 0 (follow-notif)]
 
 """
@@ -43,6 +43,25 @@ Aux Structures:
 
 THREAD_PER_PAGE = 10
 LCDB = 1
+
+def create_thread(uid,title,summary,link,domain):
+    r = redis.Redis(db = LCDB)
+    tid = generate_id()
+    tdict = {
+        'title':title,
+        'summary':summary,
+        'url':link,
+        'domain':domain,
+        'time':int(time()),
+        'cid':uid,
+        'cname':swap_user_info(uid),
+        'up':0,
+        'down':0,
+        'views':0
+        }
+    r.set('t:'+str(tid),msgpack.packb(tdict))
+    r.lpush('act:ids',tid)
+    return tid
 
 
 # tested
@@ -255,6 +274,7 @@ def get_comments(cids):
     return comments
 
 
+
 # tested
 def get_thread_headers(tids):
     """
@@ -342,32 +362,6 @@ def add_tags(tid,tags):
     for tagid in tags:
         r.lpush('tag:t:'+str(tagid),tid)
         r.lpush('t:tags:'+str(tid),tagid)
-
-
-def create_thread(title,url,domain,cid,tags=[],summary=''):
-    """
-    creates a thread and returns the thread id
-    tags is a list of tag-ids, the tags should be created (if not existent) prior to calling this function
-    """
-    r = redis.Redis(db = LCDB)
-    cname = r.get('u:'+str(cid))
-    if cname == None:
-        return (False,'Creator not found')
-    tid = generate_id()
-    thread_header = {
-        'title':title,
-        'summary':summary,
-        'url':url,
-        'domain':domain,
-        'time':int(time()),
-        'cid':cid,
-        'cname':cname
-        }
-    for tagid in tags:
-        r.lpush('t:tags:'+str(tid),tagid)
-        r.lpush('tag:t:'+str(tagid),tid)
-    r.set('t:'+str(tid),msgpack.packb(thread_header))
-    return (True,tid)
 
 
 # tested
