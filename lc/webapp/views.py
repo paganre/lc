@@ -12,7 +12,7 @@ from webapp import thread as t
 from webapp import domain as d
 from webapp import comment as c
 from webapp import user as u
-from webapp import tagger
+#from webapp import tagger
 from webapp import mario
 import json
 import traceback
@@ -67,7 +67,7 @@ def get_tag(request,tagid):
         else:
             h['following'] = 0
     
-    tags = tagger.get_top_tags(5)
+    tags = db.get_top_tags(5)
     uid = -1
     if 'uid' in request.session:
         uid = int(request.session['uid'])
@@ -85,7 +85,7 @@ def tag(request):
             tid = int(request.POST.get('tid',0))
             if tid == 0 or tag == '':
                 return HttpResponse(json.dumps({'result':-1,'error':'field not set'}))
-            res = tagger.tag(int(request.session['uid']),tid,tag)
+            res = db.tag(int(request.session['uid']),tid,tag)
             if (res[0]):
                 return HttpResponse(json.dumps({'result':0}))
             else:
@@ -407,8 +407,10 @@ def home_redis(request):
         h['time'] = pretty_time(int(h['time']))
         h['creator_name'] = h['cname']
         h['creator_id'] = h['cid']
-        
-    return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":[],"algorithm_works":False},context_instance=RequestContext(request))
+
+    tags = db.get_top_tags(5)
+
+    return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":tags,"algorithm_works":False},context_instance=RequestContext(request))
 
 
 
@@ -445,7 +447,7 @@ def home(request):
         if uid != -1:
             h['following'] = u.is_following(uid,int(h['id']))
     
-    tags = tagger.get_top_tags(5)
+    tags = db.get_top_tags(5)
     
     return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":tags,"algorithm_works":algorithm_works},context_instance=RequestContext(request))
 

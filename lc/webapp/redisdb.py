@@ -2,6 +2,7 @@ import redis
 import msgpack
 import os
 from time import time
+import traceback
 
 """
 Redis Structures:
@@ -360,8 +361,8 @@ def add_tags(tid,tags):
     """
     r = redis.Redis(db = LCDB)
     for tagid in tags:
-        r.lpush('tag:t:'+str(tagid),tid)
-        r.lpush('t:tags:'+str(tid),tagid)
+        r.rpush('tag:t:'+str(tagid),tid)
+        r.rpush('t:tags:'+str(tid),tagid)
 
 
 # tested
@@ -376,3 +377,33 @@ def swap_user_info(u):
     """
     r = redis.Redis(db = LCDB)
     return r.get('u:'+str(u))
+
+# tested
+def tag(uid,tid,tagname):
+    """
+        tags the thread with given tagname - only creator of the thread can do it for now
+        """
+    r = redis.Redis(db = LCDB)
+    header = msgpack.unpackb(r.get('t:'+str(tid)))
+    try:
+        if int(header['cid']) != int(uid):
+            return (False,'kendi postlarini etiketle bence')
+        
+        tagname = tagname.strip().lower()
+        if tagname.startswith('#'):
+            tagname = tagname[1:]
+        if '#' in tagname:
+            return (False,'boyle etiket olmaz ki')
+        if ' ' in tagname:
+            return (False,'etiketlerde bosluk olmuyo')
+        
+        tagid = get_tags_by_name([tagname])
+        if r.exists('tag:t:'+str(tagid[0])):
+            return (False,'bu etiket varmis ki bunda')
+        else:
+            add_tags(tid,tagid)
+    except:
+        return (False,str(traceback.format_exc()))
+
+def get_top_tags(N):
+    return get_tags()[:N]
