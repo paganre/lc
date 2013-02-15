@@ -398,10 +398,14 @@ def tag(uid,tid,tagname):
             return (False,'etiketlerde bosluk olmuyo')
         
         tagid = get_tags_by_name([tagname])
-        if r.exists('tag:t:'+str(tagid[0])):
-            return (False,'bu etiket varmis ki bunda')
-        else:
-            add_tags(tid,tagid)
+        for t in r.lrange('t:tags:'+str(tid),0,-1):
+            if t != None and int(t) == tagid[0]:
+                return (False,'bu etiket varmis ki bunda')
+        for t in r.lrange('tag:t:'+str(tagid[0]),0,-1):
+            if t != None and int(t) == tid:
+                return (False,'bu etiket varmis ki bunda')
+        add_tags(tid,tagid)
+        return (True,'')
     except:
         return (False,str(traceback.format_exc()))
 
