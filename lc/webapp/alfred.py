@@ -19,6 +19,7 @@ def sort_threads():
         # check if sorting is necessary
         if r.get('sorted:recently') == None:
             ids = r.lrange('act:ids',0,-1) # retrieved act-ids
+            r.delete('act:sorted:ids') # delete the old sorted act-ids list
             pipe = r.pipeline()
             for id in ids:
                 pipe.get('t:'+str(id))
@@ -30,7 +31,7 @@ def sort_threads():
             out.sort(key=lambda l: l[1], reverse=True)
             sorted_ids = [o[0] for o in out]
             for s in sorted_ids:
-                r.lpush('act:sorted:ids',s)
+                r.rpush('act:sorted:ids',s)
             r.setex('sorted:recently',1,120)
             return (True,sorted_ids) # sorted
         else:

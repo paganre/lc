@@ -395,7 +395,27 @@ def scribe(request):
 # redis temp home
 @csrf_protect
 def home_redis(request):
-    tids = db.get_thread_ids()
+
+    if not mario.check_ip(request):
+        return HttpResponseRedirect("/cus")
+    s = request.GET.get('s','')
+    if s == 'a':
+        algorithm_works = True
+        alfred.sort_threads()
+        tids_before_spamcheck = db.get_thread_ids(0, True)
+    else:
+        algorithm_works = False
+        tids_before_spamcheck = db.get_thread_ids()
+
+    tids = []
+    for tid in tids_before_spamcheck:
+        if not mario.is_spam(tid):
+            tids = tids + [tid]
+
+    uid = -1
+    if 'uid' in request.session:
+        uid = int(request.session['uid'])
+
     headers = db.get_thread_headers(tids)
     uid = -1
     if 'uid' in request.session:
@@ -410,13 +430,13 @@ def home_redis(request):
 
     tags = db.get_top_tags(5)
 
-    return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":tags,"algorithm_works":False},context_instance=RequestContext(request))
+    return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":tags,"algorithm_works":algorithm_works},context_instance=RequestContext(request))
 
 
 
 @csrf_protect
 def home(request):
-    return HttpResponse('Alp biseyler yapiyo bi saniye pampa')
+    return HttpResponse('Sevgililer gununuz kutlu olsun pampalar <3')
     if not mario.check_ip(request):
         return HttpResponseRedirect("/cus")
     s = request.GET.get('s','')

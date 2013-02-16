@@ -41,7 +41,6 @@ Aux Structures:
 
 """
 
-
 THREAD_PER_PAGE = 10
 LCDB = 1
 
@@ -409,5 +408,6 @@ def tag(uid,tid,tagname):
     except:
         return (False,str(traceback.format_exc()))
 
+# tested
 def get_top_tags(N):
     return get_tags()[:N]
