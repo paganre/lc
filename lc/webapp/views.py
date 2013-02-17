@@ -34,6 +34,7 @@ from webapp.struct.subthread import Subthread
 def cus(request):
     return render_to_response('cus.html')
 
+# redis
 @csrf_protect
 def get_tag(request,tagid):
     if not mario.check_ip(request):
@@ -41,36 +42,33 @@ def get_tag(request,tagid):
     s = request.GET.get('s', '')
     if s == 'a':
         algorithm_works = True
-        tids_b = alfred.get_best_ordered_tag(tagid)
+        tids_b = db.get_thread_ids_with_tag(tagid, page=0, algorithm=True)
     else:
         algorithm_works = False
-        tids_b = alfred.get_time_ordered_tag(tagid)
+        tids_b = db.get_thread_ids_with_tag(tagid)
     tids = []
     for tid in tids_b:
         if not mario.is_spam(tid):
             tids = tids + [tid]
-    headers = [t.get_thread_header(tid) for tid in tids]
-    headers = [h[1] for h in headers if h[0]]
     
+    headers = db.get_thread_headers(tids)
     uid = -1
     if 'uid' in request.session:
         uid = int(request.session['uid'])
-
-    for h in headers:
-        res = alfred.get_best_subthread(h['id'])
+    following = db.is_following(uid,tids)
+    for ind,h in enumerate(headers):
+        res = db.get_best_subthread(h['id'])
         if(res[0]):
             h['comments'] = res[1]
         else:
             h['comments'] = []
-        if uid != -1:
-            h['following'] = u.is_following(uid,h['id'])
-        else:
-            h['following'] = 0
-    
+        h['following'] = following[ind]
+        h['time'] = pretty_time(int(h['time']))
+        h['creator_name'] = h['cname']
+        h['creator_id'] = h['cid']
+
     tags = db.get_top_tags(5)
-    uid = -1
-    if 'uid' in request.session:
-        uid = int(request.session['uid'])
+
     return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":tags,"algorithm_works":algorithm_works},context_instance=RequestContext(request))
 
 #redis
@@ -225,6 +223,7 @@ def thread(request,tid):
         cids.reverse()
         comments = db.get_comments(cids)
         votes = [0]*len(cids)
+        uid = -1
         if 'uid' in request.session:
             uid = int(request.session['uid'])
             votes = db.did_vote(uid,cids)
@@ -413,10 +412,6 @@ def home_redis(request):
         if not mario.is_spam(tid):
             tids = tids + [tid]
 
-    uid = -1
-    if 'uid' in request.session:
-        uid = int(request.session['uid'])
-
     headers = db.get_thread_headers(tids)
     uid = -1
     if 'uid' in request.session:
@@ -442,6 +437,7 @@ def home_redis(request):
 @csrf_protect
 def home(request):
     return HttpResponse('Sevgililer gununuz kutlu olsun pampalar <3')
+    """
     if not mario.check_ip(request):
         return HttpResponseRedirect("/cus")
     s = request.GET.get('s','')
@@ -475,7 +471,7 @@ def home(request):
     tags = db.get_top_tags(5)
     
     return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":tags,"algorithm_works":algorithm_works},context_instance=RequestContext(request))
-
+    """
 
 @csrf_protect
 def submit(request):

@@ -413,6 +413,7 @@ def tag(uid,tid,tagname):
 def get_top_tags(N):
     return get_tags()[:N]
 
+# tested
 def get_best_subthread(tid):
     """
         returns the best comment subthread of the given thread
@@ -461,3 +462,22 @@ def get_best_subthread(tid):
         return (True,out)
     except:
         return (False,str(traceback.format_exc()))
+
+def get_thread_ids_with_tag(tagid, page = 0, algorithm = False):
+    try:
+        threads = get_threads_with_tag(tagid)
+        r = redis.Redis(db=LCDB)
+        if algorithm:
+            sorted_threads = []
+            for t in r.lrange('act:sorted:ids',0, -1):
+                try:
+                    i = threads.index(int(t))
+                except ValueError:
+                    i = -1
+                if i != -1:
+                    sorted_threads.append(threads[i])
+            return sorted_threads[page*THREAD_PER_PAGE:(page+1)*THREAD_PER_PAGE]
+        return threads[page*THREAD_PER_PAGE:(page+1)*THREAD_PER_PAGE]
+    except:
+        return []
+

@@ -40,81 +40,6 @@ def sort_threads():
     except:
         return (False,str(traceback.format_exc()))
 
-
-def get_time_ordered():
-    return [t.id for t in Thread.objects.all().order_by('-time_created')[:50]]
-
-def get_time_ordered_tag(tagid):
-    try:
-        threads = Tag.objects.get(id=int(tagid)).threads.all().order_by('-time_created')
-        tids = [t.id for t in threads]
-        return tids
-    except:
-        return []
-
-def get_best_ordered_tag(tagid):
-    try:
-        res = []
-        for t in Tag.objects.get(id=int(tagid)).threads.all():
-            res = res + [(t.id,contro(t.up, t.down, t.views, t.time_created))]
-        res.sort(key=lambda l: l[1], reverse=True)
-        tid = []
-        for r in res:
-            tid = tid + [r[0]]
-        return tid
-    except:
-        return []
-
-def get_best_subthread(tid):
-    """
-    returns the best comment subthread of the given thread
-    for main page display purposes
-    Sorting logic: Return the parent comment with the highest up vote
-    and return the child of this comment with the highest up vote
-    """
-    
-    try:
-        t = Thread.objects.get(pk = int(tid))
-        primer_comments = Comment.objects.filter(thread = t, parent = None).order_by('-up')
-            #get a single None thread with the hightest up vote
-        sub = []
-        if(len(primer_comments) > 0):
-            # there is at least a single comment about the thread
-            # Therefore top_primer_comment is well defined
-            # try to get the child with the highest up vote
-            top_primer_comment = primer_comments[0]
-            sub.append(top_primer_comment)
-            secondary_comments = Comment.objects.filter(parent = top_primer_comment.id).order_by('-up')
-            if(len(secondary_comments) > 0):
-                # there is at least a single child
-                # There top_secondary_comment is well defined
-                # Append it to the list
-                top_secondary_comment = secondary_comments[0]
-                sub.append(top_secondary_comment)
-        return (True,c.get_comment_fields(sub))
-    except:
-        connection._rollback()
-        return (False,str(traceback.format_exc()))
-
-def subthread_list_sort(subtread_list):
-    try:
-        # List subtreads by their parents' up field in decreasing order
-        subtread_list.sort(key=lambda l: l.comment.up, reverse=True)
-        return True
-    except:
-        # If an object that is not a subthread list, return the object
-        return False
-
-def get_best():
-    res = []
-    for t in Thread.objects.all():
-        res = res + [(t.id,contro(t.up, t.down, t.views, t.time_created))]
-    res.sort(key=lambda l: l[1], reverse=True)
-    tid = []
-    for r in res:
-        tid = tid + [r[0]]
-    return tid
-
 def contro(up, down, views, time_created):
     # Given total up votes, total down votes and total views of a thread
     # Quantifies how controversial a thread is
@@ -154,3 +79,99 @@ def contro(up, down, views, time_created):
     # ------------------------
     # Combine elements and return controversiality
     return (a1*views + a2*up_vote_estimate + a3*n)*exp(-time_elapsed*a4)
+
+
+# DEPRECATED FUNCTIONS
+
+# DEPRECATED
+# use redisdb.get_thread_ids
+"""
+    def get_time_ordered():
+    return [t.id for t in Thread.objects.all().order_by('-time_created')[:50]]
+    """
+
+# DEPRECATED
+# use redisdb.get_thread_ids_with_tag
+"""
+    def get_time_ordered_tag(tagid):
+    try:
+    threads = Tag.objects.get(id=int(tagid)).threads.all().order_by('-time_created')
+    tids = [t.id for t in threads]
+    return tids
+    except:
+    return []
+    """
+
+# DEPRECATED
+# use redisdb.get_thread_ids_with_tag
+"""
+    def get_best_ordered_tag(tagid):
+    try:
+    res = []
+    for t in Tag.objects.get(id=int(tagid)).threads.all():
+    res = res + [(t.id,contro(t.up, t.down, t.views, t.time_created))]
+    res.sort(key=lambda l: l[1], reverse=True)
+    tid = []
+    for r in res:
+    tid = tid + [r[0]]
+    return tid
+    except:
+    return []
+    """
+
+# DEPRECATED
+# migrated to redis, function is in redisdb.py
+"""
+    def get_best_subthread(tid):
+    try:
+    t = Thread.objects.get(pk = int(tid))
+    primer_comments = Comment.objects.filter(thread = t, parent = None).order_by('-up')
+    #get a single None thread with the hightest up vote
+    sub = []
+    if(len(primer_comments) > 0):
+    # there is at least a single comment about the thread
+    # Therefore top_primer_comment is well defined
+    # try to get the child with the highest up vote
+    top_primer_comment = primer_comments[0]
+    sub.append(top_primer_comment)
+    secondary_comments = Comment.objects.filter(parent = top_primer_comment.id).order_by('-up')
+    if(len(secondary_comments) > 0):
+    # there is at least a single child
+    # There top_secondary_comment is well defined
+    # Append it to the list
+    top_secondary_comment = secondary_comments[0]
+    sub.append(top_secondary_comment)
+    return (True,c.get_comment_fields(sub))
+    except:
+    connection._rollback()
+    return (False,str(traceback.format_exc()))
+    """
+
+# DEPRECATED
+# use redisdb.get_best_subthread
+"""
+    def subthread_list_sort(subtread_list):
+    try:
+    # List subtreads by their parents' up field in decreasing order
+    subtread_list.sort(key=lambda l: l.comment.up, reverse=True)
+    return True
+    except:
+    # If an object that is not a subthread list, return the object
+    return False
+    """
+
+
+# DEPRECATED
+# use redisdb.get_thread_ids
+"""
+    def get_best():
+    res = []
+    for t in Thread.objects.all():
+    res = res + [(t.id,contro(t.up, t.down, t.views, t.time_created))]
+    res.sort(key=lambda l: l[1], reverse=True)
+    tid = []
+    for r in res:
+    tid = tid + [r[0]]
+    return tid
+    """
+
