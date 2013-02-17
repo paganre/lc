@@ -73,6 +73,7 @@ def get_tag(request,tagid):
         uid = int(request.session['uid'])
     return render_to_response('home.html',{"user": request.user,"uid":uid,"headers":headers,"tags":tags,"algorithm_works":algorithm_works},context_instance=RequestContext(request))
 
+#redis
 @csrf_protect
 def tag(request):
     if not mario.check_ip(request):
@@ -422,7 +423,11 @@ def home_redis(request):
         uid = int(request.session['uid'])
     following = db.is_following(uid,tids)
     for ind,h in enumerate(headers):
-        h['comments'] = []
+        res = db.get_best_subthread(h['id'])
+        if(res[0]):
+            h['comments'] = res[1]
+        else:
+            h['comments'] = []
         h['following'] = following[ind]
         h['time'] = pretty_time(int(h['time']))
         h['creator_name'] = h['cname']

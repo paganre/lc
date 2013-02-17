@@ -3,6 +3,7 @@ import msgpack
 import os
 from time import time
 import traceback
+from webapp.pretty_time import pretty_time
 
 """
 Redis Structures:
@@ -411,3 +412,52 @@ def tag(uid,tid,tagname):
 # tested
 def get_top_tags(N):
     return get_tags()[:N]
+
+def get_best_subthread(tid):
+    """
+        returns the best comment subthread of the given thread
+        for main page display purposes
+        Sorting logic: Return the parent comment with the highest up vote
+        and return the child of this comment with the highest up vote
+        """    
+    try:
+        all_thread_comments = get_thread_comments(tid)
+        comment_headers = get_comments(all_thread_comments)
+        primer_comments = []
+        non_primers = []
+        for c in zip(comment_headers,all_thread_comments):
+            if c[0]['pid']==-1:
+                primer_comments.append(c)
+            else:
+                non_primers.append(c)
+        primer_comments.sort(key=lambda l: l[0]['up'], reverse=True)
+        #get a single None thread with the hightest up vote
+        sub = []
+        if(len(primer_comments) > 0):
+            # there is at least a single comment about the thread
+            # Therefore top_primer_comment is well defined
+            # try to get the child with the highest up vote
+            top_primer_comment = primer_comments[0]
+            sub.append(top_primer_comment)
+            secondary_comments = []
+            for c in non_primers:
+                if c[0]['pid']==top_primer_comment[1]:
+                    secondary_comments.append(c)
+            secondary_comments.sort(key=lambda l: l[0]['up'], reverse=True)
+            if(len(secondary_comments) > 0):
+                # there is at least a single child
+                # There top_secondary_comment is well defined
+                # Append it to the list
+                top_secondary_comment = secondary_comments[0]
+                sub.append(top_secondary_comment)
+            out = []
+            for comment in sub:
+                out.append({'id':comment[1],
+                            'creator_name':comment[0]['cname'],
+                            'creator_id':comment[0]['cid'],
+                            'time':pretty_time(int(comment[0]['time'])),
+                            'text':comment[0]['text'],
+                            'net_vote':comment[0]['up']-comment[0]['down']})
+        return (True,out)
+    except:
+        return (False,str(traceback.format_exc()))
