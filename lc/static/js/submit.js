@@ -15,6 +15,7 @@ function submitLink(){
 		    $("#submit-container").html(response.html);
 		    suggested_title = $("#title-field").val();
 		    domain = $("#domain-label").html();
+            domain = domain.substr(1,domain.length-2)
             }else if(response.error=='check url'){
              if($("#error-label").hasClass("dp-none")){
              $("#error-label").removeClass("dp-none");}
