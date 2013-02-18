@@ -42,6 +42,7 @@ def get_tag(request,tagid):
     s = request.GET.get('s', '')
     if s == 'a':
         algorithm_works = True
+        alfred.sort_threads()
         tids_b = db.get_thread_ids_with_tag(tagid, page=0, algorithm=True)
     else:
         algorithm_works = False
