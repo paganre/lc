@@ -211,7 +211,8 @@ def add_comment(tid,cid,text,parent=-1):
         'time':timestamp,
         'pid':parent,
         'cid':cid,
-        'cname':cname
+        'cname':cname,
+        'tid':tid
         }
     r.set('c:'+str(comment_id),msgpack.packb(comment_dict))
     r.lpush('t:comm:'+str(tid),comment_id)
