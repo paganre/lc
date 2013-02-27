@@ -45,13 +45,14 @@ Aux Structures:
 THREAD_PER_PAGE = 10
 LCDB = 1
 
-def create_thread(uid,title,summary,link,domain):
+def create_thread(uid,title,summary,link,domain,suggested):
     r = redis.Redis(db = LCDB)
     tid = generate_id()
     tdict = {
         'title':title,
         'summary':summary,
         'url':link,
+        'suggested_title':suggested,
         'domain':domain,
         'time':int(time()),
         'cid':uid,

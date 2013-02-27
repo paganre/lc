@@ -496,7 +496,7 @@ def create(request):
         uid = int(request.session['uid'])
         tid = -1
         try:
-            tid = db.create_thread(uid,title,summary,link,domain_name)
+            tid = db.create_thread(uid,title,summary,link,domain_name,suggested)
         except:
             return HttpResponse(json.dumps({'result':-1,'error':str(traceback.format_exc())}))
         return HttpResponse(json.dumps({'result':0,'tid':tid}))

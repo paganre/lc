@@ -27,6 +27,7 @@ def migrate_threads_to_redis():
             'time':t.time_created,
             'cid':t.creator.id,
             'cname':t.creator.user.username,
+            'suggested_title':t.suggested_title,
             # We need these fields for sorting algorithm
             'up':t.up,
             'down':t.down,
