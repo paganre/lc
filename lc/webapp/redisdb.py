@@ -269,7 +269,7 @@ def get_comments(cids):
             else:
                 comments[ind]['up'] = 0
             down = r.get('c:down:'+str(cids[ind]))
-            if up:
+            if down:
                 comments[ind]['down'] = int(down)
             else:
                 comments[ind]['down'] = 0
