@@ -19,7 +19,7 @@ Redis Structures:
  Tags:
   .tag:<tagid>      name of the tag
   .tag:<tagname>    id of the tag
-  .tag:t:<tagid>    thread list of the tags in a time-sorted manner
+  .tag:t:<tagid>    sorted list of tids with given tag in a time-sorted manner
  Comments:
   .c:<cid>          msgpacked comment (see:aux-structures)
   ..c:up:<cid>       up-votes of comment
@@ -313,7 +313,7 @@ def get_tags():
     for t in tags:
         tagid = int(t.split(':')[2])
         tagname = r.get('tag:'+str(tagid))
-        num_used = r.llen(t)
+        num_used = r.zcard(t)
         out.append((tagid,tagname,num_used))
     out = sorted(out, key = lambda x : x[2])
     out.reverse()
@@ -326,7 +326,7 @@ def get_threads_with_tag(tagid):
     returns the threads tagged with given tag
     """
     r = redis.Redis(db = LCDB)
-    return [int(tid) for tid in r.lrange('tag:t:'+str(tagid),0,-1)]
+    return [int(tid) for tid in r.zrange('tag:t:'+str(tagid),0,-1)]
 
 
 # tested
@@ -363,7 +363,7 @@ def add_tags(tid,tags):
     """
     r = redis.Redis(db = LCDB)
     for tagid in tags:
-        r.rpush('tag:t:'+str(tagid),tid)
+        r.zadd('tag:t:'+str(tagid),tid,int(time()))
         r.rpush('t:tags:'+str(tid),tagid)
 
 
@@ -403,7 +403,7 @@ def tag(uid,tid,tagname):
         for t in r.lrange('t:tags:'+str(tid),0,-1):
             if t != None and int(t) == tagid[0]:
                 return (False,'bu etiket varmis ki bunda')
-        for t in r.lrange('tag:t:'+str(tagid[0]),0,-1):
+        for t in r.zrange('tag:t:'+str(tagid[0]),0,-1):
             if t != None and int(t) == tid:
                 return (False,'bu etiket varmis ki bunda')
         add_tags(tid,tagid)

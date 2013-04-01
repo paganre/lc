@@ -24,6 +24,7 @@ from django.http import Http404
 from webapp.pretty_time import pretty_time
 from webapp import redisdb as db
 from webapp.struct.subthread import Subthread
+from webapp import dengo
 
 # Common site request forgery protection risk
 # Request is obtained from the login.html via POST
@@ -395,8 +396,7 @@ def scribe(request):
 
 # redis
 @csrf_protect
-def home(request):
-
+def home(request):   
     if not mario.check_ip(request):
         return HttpResponseRedirect("/cus")
     s = request.GET.get('s','')

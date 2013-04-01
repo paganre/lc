@@ -4,6 +4,7 @@ from time import time
 import msgpack
 import redis
 from webapp import user as usr
+from time import time
 
 
 MDB = 1
@@ -40,7 +41,7 @@ def migrate_threads_to_redis():
             r.set('tag:'+str(tagid),tag.name)
             r.set('tag:'+tagname,tagid)
             r.rpush('t:tags:'+str(t.id),tagid)
-            r.rpush('tag:t:'+str(tagid),t.id)
+            r.zadd('tag:t:'+str(tagid),t.id,t.time_created)
         for comment in Comment.objects.filter(thread = t).order_by('-time_created'):
             r.rpush('t:comm:'+str(t.id),comment.id)
             r.rpush('u:comm:'+str(comment.creator.id),comment.id)
